@@ -1,0 +1,8 @@
+-- ==========================================
+-- Pod Alpha PostgreSQL Initialization
+-- ==========================================
+--
+-- Migration execution will be added later.
+-- This file is intentionally kept minimal
+-- during the initial setup.
+--

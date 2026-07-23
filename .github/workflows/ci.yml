@@ -1,0 +1,92 @@
+name: Pod Alpha CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "feature/**"
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate-project:
+    name: Validate Project Structure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        run: docker compose config
+
+      - name: Verify Dockerfiles
+        run: |
+          services=(
+            gateway
+            identity
+            organization
+            policy
+            secrets
+            audit
+            configuration
+          )
+
+          for service in "${services[@]}"; do
+            if [ ! -f "services/$service/Dockerfile" ]; then
+              echo "Missing Dockerfile for $service"
+              exit 1
+            fi
+          done
+
+      - name: Verify Database Structure
+        run: |
+          directories=(
+            database
+            database/identity
+            database/organization
+            database/policy
+            database/secrets
+            database/audit
+            database/configuration
+          )
+
+          for dir in "${directories[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "Missing directory: $dir"
+              exit 1
+            fi
+          done
+
+      - name: Verify Documentation
+        run: |
+          docs=(
+            README.md
+            docker-compose.yml
+            .gitignore
+          )
+
+          for file in "${docs[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Missing file: $file"
+              exit 1
+            fi
+          done
+
+      - name: Verify SQL Files
+        run: |
+          count=$(find database -name "*.sql" | wc -l)
+
+          if [ "$count" -eq 0 ]; then
+            echo "No SQL files found."
+            exit 1
+          fi
+
+          echo "Found $count SQL files."
+
+      - name: CI Validation Complete
+        run: echo "Pod Alpha CI Pipeline completed successfully."

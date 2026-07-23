@@ -1,0 +1,450 @@
+name: pod-alpha
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  vault_data:
+  kafka_data:
+  zookeeper_data:
+
+services:
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pod_alpha
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    ports:
+      - "5432:5432"
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+
+    ports:
+      - "6379:6379"
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  vault:
+    image: hashicorp/vault:1.20
+    container_name: vault
+
+    cap_add:
+      - IPC_LOCK
+
+    command: vault server -config=/vault/config/config.hcl
+
+    volumes:
+      - vault_data:/vault/file
+      - ./docker/vault/config.hcl:/vault/config/config.hcl
+
+    ports:
+      - "8200:8200"
+
+    environment:
+      VAULT_ADDR: http://127.0.0.1:8200
+      VAULT_API_ADDR: http://vault:8200
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8200/v1/sys/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.7.0
+    container_name: zookeeper
+
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+
+    ports:
+      - "2181:2181"
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.7.0
+    container_name: kafka
+
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+    ports:
+      - "9092:9092"
+
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+  
+  envoy:
+    image: envoyproxy/envoy:v1.35-latest
+    container_name: envoy
+
+    volumes:
+      - ./docker/envoy/envoy.yaml:/etc/envoy/envoy.yaml
+
+    ports:
+      - "8080:8080"
+
+    command:
+      - envoy
+      - -c
+      - /etc/envoy/envoy.yaml
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    depends_on:
+      gateway:
+        condition: service_started
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  gateway:
+    build:
+      context: ./services/gateway
+      dockerfile: Dockerfile
+
+    image: pod-alpha/gateway
+    container_name: gateway
+
+    ports:
+      - "8081:8080"
+
+    environment:
+      APP_ENV: development
+      PORT: 8080
+
+      IDENTITY_SERVICE_URL: http://identity:8000
+      ORGANIZATION_SERVICE_URL: http://organization:8001
+      POLICY_SERVICE_URL: http://policy:8002
+      SECRETS_SERVICE_URL: http://secrets:8003
+      AUDIT_SERVICE_URL: http://audit:8082
+      CONFIGURATION_SERVICE_URL: http://configuration:8083
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    depends_on:
+      identity:
+        condition: service_started
+      organization:
+        condition: service_started
+      policy:
+        condition: service_started
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  identity:
+    build:
+      context: ./services/identity
+      dockerfile: Dockerfile
+
+    image: pod-alpha/identity
+    container_name: identity
+
+    ports:
+      - "8002:8000"
+
+    environment:
+      APP_ENV: development
+      PORT: 8000
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/pod_alpha
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: change-me
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION: 3600
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8000/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  organization:
+    build:
+      context: ./services/organization
+      dockerfile: Dockerfile
+
+    image: pod-alpha/organization
+    container_name: organization
+
+    ports:
+      - "8003:8001"
+
+    environment:
+      APP_ENV: development
+      PORT: 8001
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/pod_alpha
+      IDENTITY_SERVICE_URL: http://identity:8000
+      TENANT_CACHE_TTL: 300
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8001/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  policy:
+    build:
+      context: ./services/policy
+      dockerfile: Dockerfile
+
+    image: pod-alpha/policy
+    container_name: policy
+
+    ports:
+      - "8004:8002"
+
+    environment:
+      APP_ENV: development
+      PORT: 8002
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/pod_alpha
+      IDENTITY_SERVICE_URL: http://identity:8000
+      ORGANIZATION_SERVICE_URL: http://organization:8001
+      POLICY_CACHE_TTL: 300
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      identity:
+        condition: service_healthy
+      organization:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8002/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  secrets:
+    build:
+      context: ./services/secrets
+      dockerfile: Dockerfile
+
+    image: pod-alpha/secrets
+    container_name: secrets
+
+    ports:
+      - "8005:8003"
+
+    environment:
+      APP_ENV: development
+      PORT: 8003
+
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      SECRET_ENGINE: secret
+      SECRET_CACHE_TTL: 300
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    depends_on:
+      vault:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8003/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  audit:
+    build:
+      context: ./services/audit
+      dockerfile: Dockerfile
+
+    image: pod-alpha/audit
+    container_name: audit
+
+    ports:
+      - "8086:8082"
+
+    environment:
+      APP_ENV: development
+      PORT: 8082
+
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/pod_alpha
+
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC_AUDIT: audit-events
+
+      AUDIT_HASH_ALGORITHM: SHA256
+      AUDIT_BATCH_SIZE: 100
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8082/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  configuration:
+    build:
+      context: ./services/configuration
+      dockerfile: Dockerfile
+
+    image: pod-alpha/configuration
+    container_name: configuration
+
+    ports:
+      - "8087:8083"
+
+    environment:
+      APP_ENV: development
+      PORT: 8083
+
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/pod_alpha
+
+      ORGANIZATION_SERVICE_URL: http://organization:8001
+
+      CONFIG_CACHE_TTL: 300
+      FEATURE_FLAG_CACHE_TTL: 300
+
+    restart: unless-stopped
+
+    networks:
+      - backend
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      organization:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8083/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      
