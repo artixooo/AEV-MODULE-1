@@ -1,25 +1,21 @@
+```markdown
 # API Gateway
 
 ## Purpose
-
 The API Gateway is the single entry point for all client requests. It routes requests to the appropriate microservices while handling authentication, authorization, rate limiting, logging, and tenant context propagation.
 
 ---
 
 ## Team Ownership
-
-**Squad:** Squad 1
-
-**Lead:** Shubhradeep Paul
-
-**Members:**
-- Rohit Bapu S B
-- Sulaiba Saania
+**Squad:** Squad 1  
+**Lead:** Shubhradeep Paul  
+**Members:**  
+- Rohit Bapu S B  
+- Sulaiba Saania  
 
 ---
 
 ## Responsibilities
-
 - TLS Termination
 - JWT Validation
 - Request Routing
@@ -32,12 +28,81 @@ The API Gateway is the single entry point for all client requests. It routes req
 
 ---
 
+## Architecture
+
+This infrastructure currently runs two isolated Docker containers communicating over a private Docker network (`gateway-net`):
+
+1. **Envoy Proxy (Public Front Door - Port 10000)**
+   * Intercepts all incoming HTTP requests.
+   * Logs access details to the console for observability.
+   * Routes traffic to the correct internal service using `STRICT_DNS` discovery.
+2. **Go Gateway Server (Internal Backend - Port 8080)**
+   * Completely hidden from the outside world (no exposed host ports).
+   * Currently handles the `/health` endpoint to monitor system status.
+
+---
+
 ## APIs
 
 | Method | Endpoint  | Description            |
 |--------|-----------|------------------------|
 | ALL    | /api/v1/* | Routes client requests |
 | ALL    | /health   | Gateway Health Check   |
+
+---
+
+## Directory Structure
+```text
+services/gateway/
+├── cmd/server/main.go       # Go application providing the health endpoint
+├── envoy/envoy.yaml         # Envoy routing and logging configuration
+├── .env.example             # Template for environment variables
+├── docker-compose.yml       # Docker network stack configuration
+├── Dockerfile               # Build instructions for the Go backend
+├── Dockerfile.envoy         # Build instructions for the Envoy proxy
+└── go.mod / go.sum          # Go module dependencies (Go 1.26)
+
+```
+
+---
+
+## Local Infrastructure Setup
+
+**Prerequisites:** Docker and Docker Compose must be installed and running.
+
+1. **Start the Services:**
+Run this in the `services/gateway` directory to build and start the containers in detached mode:
+```bash
+docker compose up --build -d
+
+```
+
+
+2. **Verify the Health Endpoint:**
+Test the routing pipeline to ensure Envoy is successfully forwarding traffic:
+```bash
+curl http://localhost:10000/health
+
+```
+
+
+*(Windows PowerShell users: Use `curl -UseBasicParsing http://localhost:10000/health`)*
+**Expected Output:** `Gateway is active and healthy`
+3. **View the Access Logs:**
+To see the record of your HTTP requests routed through Envoy:
+```bash
+docker compose logs gateway-proxy
+
+```
+
+
+4. **Stop the Services:**
+```bash
+docker compose down
+
+```
+
+
 
 ---
 
@@ -49,21 +114,26 @@ No dedicated database.
 
 ## Dependencies
 
-- Identity Service
-- Organization Service
-- Policy Service
-- Configuration Service
+* Identity Service
+* Organization Service
+* Policy Service
+* Configuration Service
 
 ---
 
 ## Technology
 
-- Go
-- Echo Framework
-- Envoy Proxy
+* Go
+* Echo Framework
+* Envoy Proxy
+* Docker / Docker Compose
 
 ---
 
 ## Environment Variables
 
 See `.env.example`
+
+```
+
+```

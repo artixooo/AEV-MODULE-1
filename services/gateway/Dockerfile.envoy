@@ -1,0 +1,8 @@
+# Use official Envoy stable release
+FROM envoyproxy/envoy:v1.31.0
+
+COPY envoy/envoy.yaml /etc/envoy/envoy.yaml
+
+EXPOSE 10000
+
+CMD ["/usr/local/bin/envoy", "-c", "/etc/envoy/envoy.yaml"]
