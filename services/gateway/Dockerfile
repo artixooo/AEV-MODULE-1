@@ -8,7 +8,12 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o gateway ./cmd/server
 
-FROM alpine:latest
+# Pinned to a specific Alpine version instead of latest
+FROM alpine:3.20
+
+# Create a non-root user and group for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
 
 WORKDIR /app
 COPY --from=builder /app/gateway .

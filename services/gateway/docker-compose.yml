@@ -1,34 +1,26 @@
-version: "3.8"
-
 services:
-  # Downstream Go Microservice (Internal Backend)
-  gateway-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: gateway-app
-    environment:
-      - PORT=8080
-    networks:
-      - gateway-net
-    restart: unless-stopped
-    # We do NOT publish port 8080 to the host; traffic must go through Envoy
-
-  # Upstream Reverse Proxy (Public Front Door)
+  # Downstream-facing Envoy Proxy (Client-facing edge)
   gateway-proxy:
     build:
       context: .
       dockerfile: Dockerfile.envoy
-    container_name: gateway-proxy
     ports:
       - "10000:10000"
-    depends_on:
-      - gateway-app
     networks:
       - gateway-net
-    restart: unless-stopped
+    depends_on:
+      - gateway-app
+
+  # Upstream Go Application (Internal backend)
+  gateway-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8080
+    networks:
+      - gateway-net
 
 networks:
   gateway-net:
-    name: gateway-net
     driver: bridge

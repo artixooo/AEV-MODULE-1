@@ -1,4 +1,5 @@
 ```markdown
+
 # API Gateway
 
 ## Purpose
@@ -46,7 +47,6 @@ This infrastructure currently runs two isolated Docker containers communicating 
 
 | Method | Endpoint  | Description            |
 |--------|-----------|------------------------|
-| ALL    | /api/v1/* | Routes client requests |
 | ALL    | /health   | Gateway Health Check   |
 
 ---
@@ -60,9 +60,7 @@ services/gateway/
 ├── docker-compose.yml       # Docker network stack configuration
 ├── Dockerfile               # Build instructions for the Go backend
 ├── Dockerfile.envoy         # Build instructions for the Envoy proxy
-└── go.mod / go.sum          # Go module dependencies (Go 1.26)
-
-```
+└── go.mod / go.sum          # Go module dependencies (Go 1.25)
 
 ---
 
