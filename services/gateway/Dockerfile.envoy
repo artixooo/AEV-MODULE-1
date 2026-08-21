@@ -1,5 +1,4 @@
-# Use official Envoy stable release
-FROM envoyproxy/envoy:v1.33.0
+FROM envoyproxy/envoy:v1.37.1
 COPY envoy/envoy.yaml /etc/envoy/envoy.yaml
 
 EXPOSE 10000
