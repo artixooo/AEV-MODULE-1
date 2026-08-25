@@ -302,6 +302,8 @@ Prepare the Secrets Service foundation and verify the complete development envir
 
 ## Tasks Completed
 
+## Tasks Completed
+
 - ✅ Initialized FastAPI project setup
 - ✅ Prepared Docker configuration
 - ✅ Prepared HashiCorp Vault configuration
@@ -330,6 +332,39 @@ Prepare the Secrets Service foundation and verify the complete development envir
 
 The foundational setup for the **Secrets Service** has been prepared and verified. The service architecture, Docker configuration, Vault integration scaffolding, project structure, and documentation provide a solid foundation for implementing secret management features in future development phases.
 
+
+# Week 2 Status
+
+## Sprint
+**Week 2 – Vault Documentation, Architecture Review & Environment Verification (Issue #18)**
+
+### Objective
+Review HashiCorp Vault architecture, verify local Docker container orchestration and health probes, evaluate authentication models, and prepare the project structure for upcoming feature implementation.
+
+---
+
+## Component & Scope Status
+
+| Scope Item / Deliverable | Status | Description / Notes |
+|---|---|---|
+| **Vault Documentation & Architecture** | **Reviewed** | Evaluated KV secret engine models, paths, and token lifecycles. |
+| **Vault Authentication Strategy** | **Reviewed** | Studied Token and AppRole authentication patterns for development and runtime environments. |
+| **Vault Docker Image & Container Health** | **Verified** | Verified `hashicorp/vault:1.20` container initialization, unseal flow, and baseline connectivity. |
+| **Service Folder Layout & Dependencies** | **Prepared** | Structured `app/`, `docs/`, `migrations/`, and defined dependencies in `requirements.txt`. |
+| **Environment Configuration Template** | **Prepared** | Provided sanitized `.env.example` with standard environment placeholders. |
+| **Health & Readiness Validation Harness** | **Verified** | Verified liveness (`/health`) and infrastructure connectivity (`/ready`) endpoints against unsealed Vault. |
+| **Business Logic & CRUD API Implementation** | **Planned / Out of Scope** | Full secret creation, rotation, and retrieval endpoints are deferred to subsequent implementation sprints. |
+
+---
+
+## Deliverables Summary
+
+- **Reviewed**: HashiCorp Vault architecture, token lifecycle, and authentication mechanics.
+- **Prepared**: Service directory structure, dependency definitions, and sanitized environment templates.
+- **Verified**: Vault Docker container execution, unseal workflow, and readiness probe responses.
+- **Implemented**: None (business endpoints deferred to implementation phase per Issue #18 scope).
+
+---
 
 **Squad 5 – Secrets**
 
