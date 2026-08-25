@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 
@@ -15,6 +15,7 @@ FROM alpine:3.20
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
+
 COPY --from=builder --chown=appuser:appgroup /api-gateway .
 COPY --chown=appuser:appgroup .env.example .
 

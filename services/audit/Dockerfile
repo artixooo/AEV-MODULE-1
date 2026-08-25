@@ -1,7 +1,13 @@
-FROM golang:1.24-alpine
+FROM golang:1.26-alpine
+
 WORKDIR /app
+
+COPY go.mod ./
+
 COPY . .
-RUN go mod download
+
 RUN go build -o audit ./cmd/server
-EXPOSE 8081
+
+EXPOSE 8082
+
 CMD ["./audit"]

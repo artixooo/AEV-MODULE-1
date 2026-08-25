@@ -72,3 +72,28 @@ Provides authentication and identity management for users. Responsible for secur
 ## Environment Variables
 
 See `.env.example`
+
+---
+
+## Infrastructure
+
+- PostgreSQL connection configured through environment variables
+- Redis connection configured through environment variables
+- Database tables initialized during application startup
+- Redis connectivity verified during application startup
+- Graceful Redis connection shutdown on application termination
+
+## Health Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /health | Service health check |
+| GET | /ready | Database and Redis readiness check |
+
+## Local Service Startup
+
+```bash
+uvicorn app.main:app --reload
+```
+
+PostgreSQL and Redis must be available before starting the Identity Service.

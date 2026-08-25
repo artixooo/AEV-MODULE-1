@@ -1,64 +1,58 @@
 # Audit Service
 
-## Purpose
+## Overview
 
-Captures immutable audit events from all services to provide compliance, traceability, and security monitoring.
+The Audit Service provides the infrastructure foundation for audit event processing in the AEV Platform.
 
----
+The Week 2 implementation focuses on service configuration, PostgreSQL connectivity, Kafka connectivity/configuration, health verification, Docker networking, and service startup.
 
-## Team Ownership
-
-**Squad:** Squad 6
-
-**Lead:** Bhumika Ghimire
-
-**Members:**
-- Sumedha Shree
+Audit event consumption, event processing, persistence workflows, and audit APIs are planned for future milestones and are not implemented as part of Week 2.
 
 ---
 
-## Responsibilities
+## Week 2 Scope
 
-- Immutable Audit Logs
-- Kafka Consumer
-- Hash Chaining
-- Compliance Reporting
-- Log Search
-- Audit Verification
+### Configured / Verified
 
----
+- Go module and service dependencies
+- Environment-based configuration
+- PostgreSQL configuration and connectivity
+- Kafka configuration and connectivity
+- `/health` endpoint
+- Docker configuration
+- Docker networking
+- Service startup
 
-## APIs
+### Not Implemented in Week 2
 
-| Method | Endpoint   | Description       |
-|--------|------------|-------------------|
-| GET    | /logs      | List Audit Logs   |
-| GET    | /logs/{id} | Get Audit Record  |
-| GET    | /search    | Search Audit Logs |
-
----
-
-## Database
-
-PostgreSQL
+- Kafka event consumer
+- Kafka event processing
+- Audit event persistence/business workflows
+- Audit log retrieval APIs
+- Audit log search APIs
+- Hash-chain processing
+- Audit event business logic
 
 ---
 
-## Dependencies
+## Project Structure
 
-- Kafka
-- All Services (consume audit events)
+```text
+services/audit/
+├── cmd/
+│   └── server/
+│       └── main.go
+├── internal/
+│   ├── config/
+│   ├── handlers/
+│   └── repository/
+├── .env.example
+├── Dockerfile
+├── go.mod
+├── go.sum
+└── README.md
+
 
 ---
 
-## Technology
-
-- Go
-- PostgreSQL
-- Kafka
-
----
-
-## Environment Variables
-
-See `.env.example`
+© AEV Module 1 – Audit Service

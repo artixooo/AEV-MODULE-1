@@ -1,6 +1,6 @@
 module github.com/Farhan15914/AEV-Module1_POD-Alpha
 
-go 1.25.0
+go 1.26
 
 require (
 	github.com/joho/godotenv v1.5.1

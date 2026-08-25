@@ -1,6 +1,5 @@
 .git
-.github
-docs
-tests
-*.log
 .env
+README.md
+docs/
+tests/
