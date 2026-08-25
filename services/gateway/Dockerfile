@@ -6,12 +6,12 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-
 RUN CGO_ENABLED=0 GOOS=linux go build -o /api-gateway ./cmd/server
 
+# Pinned to a specific secure Alpine version
+FROM alpine:3.20
 
-FROM alpine:latest
-
+# Create a non-root user and group for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
