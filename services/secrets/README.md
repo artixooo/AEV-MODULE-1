@@ -368,5 +368,36 @@ Review HashiCorp Vault architecture, verify local Docker container orchestration
 
 **Squad 5 – Secrets**
 
+## Sprint
+**Week 3 – Secrets Service Infrastructure Validation & Security Preparation (Issue #62)**
+
+### Objective
+Validate the Secrets Service infrastructure, verify environment configurations, ensure Docker networking connectivity, improve logging, and verify health endpoints in preparation for Week 4 authentication features.
+
+---
+
+## Component & Scope Status
+
+| Scope Item / Task | Status | Description / Notes |
+|---|---|---|
+| **Vault Connectivity** | **Verified** | Verified communication with unsealed Vault instance via `hvac`. |
+| **Authentication Configuration** | **Verified** | Validated root and development token workflows. |
+| **Environment Variable Validation** | **Verified** | Validated `VAULT_ADDR`, `VAULT_TOKEN`, and service configuration loading via `pydantic-settings`. |
+| **Docker Networking** | **Verified** | Container DNS resolution and bridge network connectivity validated against `pod-alpha_backend`. |
+| **Health Endpoints** | **Verified** | `/health` (Liveness) and `/ready` (Vault connectivity) endpoints verified. |
+| **Logging Improvements** | **Verified** | Standardized structured logging implemented for service lifecycle and probe events. |
+
+---
+
+## Deliverables Summary
+
+- **Vault Infrastructure**: Validated and operational.
+- **Configuration & Logging**: Verified and standardized.
+- **Documentation**: Updated with Week 3 milestone outcomes.
+- **Next Step**: Ready for Week 4 integration.
+
+---
+
+**Squad 5 – Secrets**
 - **Bezawada Kushal Ram** — Squad Lead
 - **Adhithyan Biju** — Squad Member
