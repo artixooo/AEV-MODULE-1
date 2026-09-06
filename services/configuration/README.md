@@ -28,7 +28,7 @@ Centralized service for managing application configuration, feature flags, and t
 
 ---
 
-## Folder Structure
+# Configuration Service — Week 3
 
 services/configuration/
 ├── cmd/
