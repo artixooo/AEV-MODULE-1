@@ -1,19 +1,22 @@
-from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from uuid import UUID
+
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 
 class UserCreate(BaseModel):
-    username: str
+    username: str = Field(..., min_length=3, max_length=100)
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=8, max_length=128)
 
 
 class UserResponse(BaseModel):
-    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
     username: str
     email: EmailStr
-    is_active: bool
+    is_email_verified: bool
+    is_mfa_enabled: bool
+    status: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True

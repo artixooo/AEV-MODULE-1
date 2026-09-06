@@ -2,10 +2,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.core.database import engine, Base
 from app.core.redis import check_redis, close_redis
+from app.db.migrations import run_migrations
 
+# Import models so SQLAlchemy registers them with Base
 from app.models.user import User
+from app.models.session import Session
 from app.models.refresh_token import RefreshToken
 
 from app.routers.auth_router import router as auth_router
@@ -13,21 +15,34 @@ from app.routers.auth_router import router as auth_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Application startup and shutdown lifecycle.
 
-    # Database initialization
-    Base.metadata.create_all(bind=engine)
-    print("Database initialized successfully!")
+    Startup:
+    - Run Identity Service database migrations
+    - Check Redis connectivity
 
-    # Redis connection check
+    Shutdown:
+    - Close Redis connection
+    """
+
+    try:
+        run_migrations()
+        print("Database migrations completed successfully!")
+
+    except Exception as e:
+        print(f"Database migration failed: {e}")
+        raise
+
     try:
         await check_redis()
         print("Redis connected successfully!")
+
     except Exception as e:
         print(f"Redis connection failed: {e}")
 
     yield
 
-    # Graceful shutdown
     await close_redis()
     print("Identity Service shutdown complete")
 
@@ -35,7 +50,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Identity Service",
     version="0.1.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 

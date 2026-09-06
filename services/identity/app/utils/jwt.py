@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
 
 from app.core.config import settings
 
@@ -10,19 +10,18 @@ from app.core.config import settings
 security = HTTPBearer()
 
 
-# ==========================
-# Create Access Token
-# ==========================
-
 def create_access_token(
-    data: dict
+    data: dict,
+    expires_delta: timedelta | None = None
 ):
-
     to_encode = data.copy()
 
-    expire = datetime.now(timezone.utc) + timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
 
     to_encode.update(
         {
@@ -38,14 +37,9 @@ def create_access_token(
     )
 
 
-# ==========================
-# Create Refresh Token
-# ==========================
-
 def create_refresh_token(
     data: dict
 ):
-
     to_encode = data.copy()
 
     expire = datetime.now(timezone.utc) + timedelta(
@@ -66,18 +60,12 @@ def create_refresh_token(
     )
 
 
-# ==========================
-# Verify Access Token
-# ==========================
-
 def verify_token(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
-
     token = credentials.credentials
 
     try:
-
         payload = jwt.decode(
             token,
             settings.JWT_SECRET_KEY,
@@ -86,28 +74,35 @@ def verify_token(
             ]
         )
 
+        if payload.get("type") != "access":
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid access token"
+            )
+
+        if not payload.get("sub"):
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token payload"
+            )
+
         return payload
 
+    except HTTPException:
+        raise
 
-    except Exception:
-
+    except JWTError:
         raise HTTPException(
             status_code=401,
             detail="Invalid or expired token"
         )
 
 
-# ==========================
-# Decode Any JWT Token
-# ==========================
-
 def decode_token(
     token: str
 ):
-
     try:
-
-        payload = jwt.decode(
+        return jwt.decode(
             token,
             settings.JWT_SECRET_KEY,
             algorithms=[
@@ -115,9 +110,5 @@ def decode_token(
             ]
         )
 
-        return payload
-
-
-    except Exception:
-
+    except JWTError:
         return None

@@ -1,12 +1,11 @@
-CREATE TABLE sessions (
-
+CREATE TABLE IF NOT EXISTS sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     user_id UUID NOT NULL,
 
     tenant_id UUID NOT NULL,
 
-    session_token VARCHAR(255) NOT NULL UNIQUE,
+    session_token TEXT NOT NULL UNIQUE,
 
     device_name VARCHAR(150),
 
@@ -23,9 +22,8 @@ CREATE TABLE sessions (
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
+    
     FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
-
 );

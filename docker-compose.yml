@@ -39,7 +39,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  
+
   redis:
     image: redis:8-alpine
     container_name: redis
@@ -90,7 +90,7 @@ services:
       - backend
 
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q","--server-response" ,"http://127.0.0.1:8200/v1/sys/health?standbyok=true&sealedcode=200&uninitcode=200"]
+      test: ["CMD", "wget", "--spider", "-q", "--server-response", "http://127.0.0.1:8200/v1/sys/health?standbyok=true&sealedcode=200&uninitcode=200"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -152,7 +152,7 @@ services:
       interval: 20s
       timeout: 10s
       retries: 5
-  
+
   envoy:
     image: envoyproxy/envoy:v1.35-latest
     container_name: envoy
@@ -178,7 +178,7 @@ services:
         condition: service_started
 
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080"]
+      test: ["CMD-SHELL", "pidof envoy >/dev/null 2>&1"]
       interval: 20s
       timeout: 5s
       retries: 5
@@ -226,8 +226,8 @@ services:
 
   identity:
     build:
-      context: ./services/identity
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/identity/Dockerfile
 
     image: pod-alpha/identity
     container_name: identity
@@ -271,10 +271,10 @@ services:
     healthcheck:
       test:
         [
-        "CMD",
-        "python",
-        "-c",
-        "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
         ]
       interval: 20s
       timeout: 5s
@@ -385,7 +385,7 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
       interval: 20s
       timeout: 5s
       retries: 5

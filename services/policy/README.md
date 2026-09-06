@@ -95,7 +95,7 @@ services/policy/
 > [!NOTE]
 > `app/api/`, `app/schemas/`, `app/services/`, `app/middleware/`, and `app/utils/` exist as empty scaffold folders (matching Identity/Organization's structure) — they'll be filled in as RBAC/ABAC work lands in future issues.
 
----
+The Policy Service will become the centralized authorization authority for the AEV Platform. **This PR covers only Week 1**: project setup and authorization database preparation. Authorization *logic* is Week 2 work and is tracked separately.
 
 ## 🔧 Environment Variables
 
