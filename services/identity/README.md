@@ -70,6 +70,7 @@ Provides authentication and identity management for users. Responsible for secur
 ---
 
 ## Environment Variables
+Identity Service authentication and infrastructure configuration is loaded through environment variables.
 
 See `.env.example`
 
