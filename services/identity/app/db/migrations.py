@@ -1,11 +1,21 @@
 from pathlib import Path
 
-from sqlalchemy import text # type: ignore
+from sqlalchemy import text  # type: ignore
 
 from app.core.database import engine
 
 
-MIGRATIONS_DIR = Path("/app/database/identity/migrations")
+DOCKER_MIGRATIONS_DIR = Path("/app/database/identity/migrations")
+
+if DOCKER_MIGRATIONS_DIR.exists():
+    MIGRATIONS_DIR = DOCKER_MIGRATIONS_DIR
+else:
+    MIGRATIONS_DIR = (
+        Path(__file__).resolve().parents[4]
+        / "database"
+        / "identity"
+        / "migrations"
+    )
 
 
 def run_migrations():

@@ -1,25 +1,31 @@
 import uuid
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
+from app.api.api_auth import (
+    AuthErrorResponse,
+    LoginRequest,
+    RefreshRequest,
+    RefreshResponse,
+    TokenResponse,
+)
 from app.core.database import get_db
-from app.schemas.user_schema import (
-    UserCreate,
-    UserLogin,
-    UserResponse,
+from app.repositories.user_repository import get_user_by_email
+from app.schemas.user_schema import UserCreate, UserResponse
+from app.services.auth_service import (
+    AuthError,
+    TokenInvalidError,
+    login as authenticate_and_login,
+    refresh as refresh_tokens,
 )
 from app.services.user_service import create_user
-from app.repositories.user_repository import get_user_by_email
-from app.services.auth_service import (
-    login_user,
-    refresh_access_token,
-)
 from app.utils.jwt import verify_token
 
 
 router = APIRouter(
-    prefix="/auth",
+    prefix="/api/v1/auth",
     tags=["Authentication"],
 )
 
@@ -51,16 +57,34 @@ def register(
     )
 
 
-@router.post("/login")
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    responses={
+        401: {
+            "model": AuthErrorResponse,
+            "description": "Authentication failed",
+        }
+    },
+)
 def login(
-    user: UserLogin,
+    payload: LoginRequest,
     db: Session = Depends(get_db),
 ):
-    return login_user(
-        db=db,
-        email=user.email,
-        password=user.password,
-    )
+    try:
+        return authenticate_and_login(
+            db=db,
+            email=payload.email,
+            password=payload.password,
+        )
+    except AuthError as exc:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "detail": exc.detail,
+                "error_code": exc.error_code,
+            },
+        )
 
 
 @router.get("/profile")
@@ -75,12 +99,30 @@ def profile(
     }
 
 
-@router.post("/refresh")
+@router.post(
+    "/refresh",
+    response_model=RefreshResponse,
+    responses={
+        401: {
+            "model": AuthErrorResponse,
+            "description": "Refresh token validation failed",
+        }
+    },
+)
 def refresh(
-    refresh_token: str = Body(..., embed=True),
+    payload: RefreshRequest,
     db: Session = Depends(get_db),
 ):
-    return refresh_access_token(
-        db=db,
-        refresh_token=refresh_token,
-    )
+    try:
+        return refresh_tokens(
+            db=db,
+            refresh_token=payload.refresh_token,
+        )
+    except (TokenInvalidError, AuthError) as exc:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "detail": exc.detail,
+                "error_code": exc.error_code,
+            },
+        )
