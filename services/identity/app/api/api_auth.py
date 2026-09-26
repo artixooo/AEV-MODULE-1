@@ -39,7 +39,7 @@ class TokenResponse(BaseModel):
             "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
             "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
             "token_type": "bearer",
-            "expires_in": 900,
+            "expires_in": 1800,
         }
     })
 
@@ -58,7 +58,7 @@ class RefreshResponse(BaseModel):
             "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
             "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
             "token_type": "bearer",
-            "expires_in": 900,
+            "expires_in": 1800,
         }
     })
 
