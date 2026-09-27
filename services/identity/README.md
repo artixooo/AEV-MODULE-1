@@ -104,6 +104,26 @@ ACCESS_TOKEN_EXPIRE_MINUTES
 
 The default configuration is 30 minutes.
 
+| Method | Gateway Endpoint | Identity Service Endpoint | Description |
+|--------|------------------|---------------------------|-------------|
+| POST | `/api/v1/auth/login` | `/auth/login` | Authenticate user and issue access and refresh tokens |
+| POST | `/api/v1/auth/refresh` | `/auth/refresh` | Generate a new access token using a refresh token |
+
+### Login
+
+**POST** `/api/v1/auth/login`
+
+Authenticates a user using their email address and password.
+
+On successful authentication, the service returns an access token and refresh token.
+
+### Refresh Token
+
+**POST** `/api/v1/auth/refresh`
+
+Generates a new access token using a valid refresh token supplied as the `refresh_token` query parameter.
+
+For the complete API contract, see [`docs/API.md`](docs/API.md) and [`docs/openapi.yaml`](docs/openapi.yaml).
 ---
 
 ## Refresh Token
