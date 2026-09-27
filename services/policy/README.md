@@ -193,6 +193,14 @@ pytest tests/ -v
 
 Result: 16 passed, 0 failed, 0 errors.
 
+## Authentication & Architecture Contracts
+For detailed architectural flows, token contracts, and RBAC specifications:
+- [Gateway Authentication Flow](../../docs/architecture/gateway-auth-flow.md)
+- [JWT Authentication Flow & Claims Contract](../../docs/architecture/jwt-auth-flow.md)
+- [RBAC Architecture & Roles Model](../../docs/architecture/rbac-architecture.md)
+- [Authentication Setup & Verification Guide](../../docs/setup/authentication-setup-guide.md)
+
+
 Squad 4 — Policy Service | CyArt Tech LLP | AEV Platform (Pod Alpha)
 
 Utkarsh Pratham (Squad Lead) | Narayanan Varadarajan (Squad Member)
