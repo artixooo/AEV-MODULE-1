@@ -11,6 +11,7 @@ from app.models.session import Session
 from app.models.refresh_token import RefreshToken
 
 from app.routers.auth_router import router as auth_router
+from app.routers.router_logout import router as logout_router
 
 
 @asynccontextmanager
@@ -55,6 +56,7 @@ app = FastAPI(
 
 
 app.include_router(auth_router)
+app.include_router(logout_router)
 
 
 @app.get("/")

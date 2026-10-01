@@ -1,4 +1,4 @@
-from pydantic import computed_field
+from pydantic import computed_field, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,10 +16,11 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: int
 
-    JWT_SECRET_KEY: str
-    JWT_ALGORITHM: str
+    JWT_SECRET_KEY: str = Field(min_length=32)
+    JWT_ALGORITHM: str = Field(min_length=1)
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, gt=0)
+    REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=7, gt=0)
 
     model_config = SettingsConfigDict(
         env_file=".env",

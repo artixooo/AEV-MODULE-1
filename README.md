@@ -1400,3 +1400,128 @@ Your current README should **not claim that every service is fully implemented**
 So I deliberately used wording like **"foundation established," "containerized," "configuration," and "health-checked"** rather than claiming that authentication, RBAC, OAuth, policy evaluation, etc. are already complete.
 
 For the Week 1 PR, that's much more accurate and defensible.
+
+# Week 3 - Security Integration, Configuration and Verification
+
+## Objectives
+
+Week 3 focused on completing the Organization Service security integration, improving configuration management, cleaning up test coverage, and completing service verification.
+
+## Completed Work
+
+### JWT Authentication
+
+- Resolved the JWT import mismatch between the authentication and security modules.
+- Standardized JWT validation through `validate_jwt_claims()`.
+- Added validation for required JWT claims.
+- Added rejection of invalid JWTs.
+- Added rejection of JWTs missing the required `sub` claim.
+
+### Bearer Authentication
+
+- Verified extraction of Bearer tokens from the `Authorization` header.
+- Verified rejection when the Authorization header is missing.
+- Verified rejection when an invalid authentication scheme is supplied.
+
+### Tenant Context
+
+- Verified tenant context creation from JWT claims.
+- Verified user ID extraction from the `sub` claim.
+- Verified tenant ID extraction when `tenant_id` is present.
+- Verified behavior when `tenant_id` is not present.
+- Verified rejection when the required JWT subject is missing.
+
+### Authorization
+
+- Verified permission-based authorization.
+- Verified that users with the required permission are allowed.
+- Verified that users without the required permission are rejected.
+- Verified HTTP `403 Forbidden` for missing permissions.
+
+### Database Configuration
+
+Hardcoded PostgreSQL credentials were removed from `docker-compose.yml`.
+
+Database configuration now uses environment variables:
+
+- `DATABASE_URL`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_DB`
+
+Local development values are provided through `.env`, which is excluded from source control.
+
+### Testing
+
+Security test coverage was expanded to include:
+
+- Bearer token extraction
+- Missing Authorization header
+- Invalid authorization scheme
+- Valid JWT validation
+- Invalid JWT rejection
+- Missing `sub` claim rejection
+
+Duplicate coverage was cleaned up while preserving unique security, tenant context, and authorization tests.
+
+## Week 3 Verification Evidence
+
+| Verification | Result |
+|---|---|
+| Bearer token extraction | PASSED |
+| Invalid authorization scheme rejection | PASSED |
+| JWT validation | PASSED |
+| Invalid JWT rejection | PASSED |
+| Missing `sub` rejection | PASSED |
+| Tenant context with tenant | PASSED |
+| Tenant context without tenant | PASSED |
+| Permission granted | PASSED |
+| Permission denied | PASSED |
+| HTTP 403 authorization | PASSED |
+| Organization service startup | PASSED |
+| `/health` endpoint | PASSED |
+| `/ready` endpoint | PASSED |
+| Database connectivity | PASSED |
+| Full pytest suite | **23 PASSED** |
+
+## Service Verification
+
+The Organization Service was started through Docker Compose and verified as healthy.
+
+### Health Check
+
+`GET /health`
+
+Result:
+
+`HTTP 200 OK`
+
+Response:
+
+`{"status":"healthy","service":"organization-service"}`
+
+### Readiness Check
+
+`GET /ready`
+
+Result:
+
+`HTTP 200 OK`
+
+Response:
+
+`{"status":"ready","database":"connected"}`
+
+## Final Test Result
+
+The complete Organization Service test suite was executed with:
+
+`python -m pytest -v`
+
+Final result:
+
+**23 passed in 4.58s**
+
+## Week 3 Status
+
+Week 3 security integration, environment-based database configuration, authorization verification, service startup verification, and automated testing have been completed.

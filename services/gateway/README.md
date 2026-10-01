@@ -135,3 +135,10 @@ See `.env.example`
 ```
 
 ```
+
+## Authentication & Architecture Contracts
+For detailed architectural flows, token contracts, and RBAC specifications:
+- [Gateway Authentication Flow](../../docs/architecture/gateway-auth-flow.md)
+- [JWT Authentication Flow & Claims Contract](../../docs/architecture/jwt-auth-flow.md)
+- [RBAC Architecture & Roles Model](../../docs/architecture/rbac-architecture.md)
+- [Authentication Setup & Verification Guide](../../docs/setup/authentication-setup-guide.md)

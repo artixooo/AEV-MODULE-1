@@ -18,9 +18,9 @@ services:
     container_name: postgres
 
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pod_alpha
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -35,15 +35,14 @@ services:
       - backend
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
-
+      
   redis:
     image: redis:8-alpine
     container_name: redis
-
     command: redis-server /usr/local/etc/redis/redis.conf
 
     volumes:
@@ -295,7 +294,12 @@ services:
     environment:
       APP_ENV: development
       PORT: 8001
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/pod_alpha
+
+      DATABASE_URL: ${DATABASE_URL}
+
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+
       IDENTITY_SERVICE_URL: http://identity:8000
       TENANT_CACHE_TTL: 300
 
@@ -330,7 +334,7 @@ services:
     environment:
       APP_ENV: development
       PORT: 8002
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/pod_alpha
+      DATABASE_URL:  ${DATABASE_URL}
       IDENTITY_SERVICE_URL: http://identity:8000
       ORGANIZATION_SERVICE_URL: http://organization:8001
       POLICY_CACHE_TTL: 300
@@ -405,7 +409,7 @@ services:
       APP_ENV: development
       PORT: 8082
 
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/pod_alpha
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
       KAFKA_BROKERS: kafka:9092
       KAFKA_TOPIC_AUDIT: audit-events
@@ -445,7 +449,7 @@ services:
       APP_ENV: development
       PORT: 8083
 
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/pod_alpha
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
       ORGANIZATION_SERVICE_URL: http://organization:8001
 
@@ -468,4 +472,5 @@ services:
       interval: 20s
       timeout: 5s
       retries: 5
-      
+
+

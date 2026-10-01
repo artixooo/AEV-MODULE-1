@@ -3,6 +3,7 @@ module github.com/Farhan15914/AEV-Module1_POD-Alpha
 go 1.26
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.15.4
 )

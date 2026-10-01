@@ -5,11 +5,13 @@ Squad 4 - Pod Alpha (Foundation & Identity)
 Squad Lead: Utkarsh Pratham
 Squad Member: Narayanan Varadarajan
 
-Week 1/2 scope: project setup, config, DB models mirroring the
-migration-defined schema, health/readiness endpoints, and infra
-readiness (config loading, graceful shutdown). RBAC/ABAC evaluation,
-SoD enforcement, permission endpoints, and caching are Week 3+
-authorization work and are intentionally not wired in here yet.
+Scope: project setup, config, DB models mirroring the migration-defined
+schema, health/readiness endpoints, infra readiness (config loading,
+graceful shutdown — Week 1/2), and the RBAC foundation (Issue #61) —
+role/permission listing and a pure RBAC /evaluate endpoint, protected
+by JWT authentication. ABAC evaluation, Segregation of Duties
+enforcement, and caching are out of scope and are intentionally not
+wired in here.
 
 Schema ownership: Database tables are created and versioned exclusively through
 the migration files in database/policy/migrations/*.sql, applied via
@@ -31,7 +33,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 import app.models.policy_models  # noqa: F401 — import registers ORM metadata & relationships
-from app.routers import health_router
+from app.routers import health_router, policy_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -110,8 +112,8 @@ def _redact_url(url: str) -> str:
 
 app = FastAPI(
     title="Policy Service",
-    description="Pod Alpha Authorization Service — infrastructure readiness (Week 1/2)",
-    version="0.2.0",
+    description="Pod Alpha Authorization Service — infrastructure readiness & RBAC foundation",
+    version="0.3.0",
     lifespan=lifespan,
 )
 
@@ -124,6 +126,7 @@ app.add_middleware(
 )
 
 app.include_router(health_router.router)
+app.include_router(policy_router.router)
 
 
 @app.get("/", tags=["Root"])
