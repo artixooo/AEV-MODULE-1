@@ -294,7 +294,12 @@ services:
     environment:
       APP_ENV: development
       PORT: 8001
-      DATABASE_URL:  ${DATABASE_URL}
+
+      DATABASE_URL: ${DATABASE_URL}
+
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+
       IDENTITY_SERVICE_URL: http://identity:8000
       TENANT_CACHE_TTL: 300
 

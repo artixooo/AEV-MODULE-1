@@ -1,4 +1,4 @@
-﻿package main
+package main
 
 import (
 	"log"
@@ -31,11 +31,22 @@ func main() {
 	e.Server.ReadTimeout = 10 * time.Second
 	e.Server.WriteTimeout = 10 * time.Second
 
-	// 1. Public Routes (Bypass Auth)
-	e.GET("/health", func(c echo.Context) error { return c.String(http.StatusOK, "Gateway is active and healthy") })
-	e.GET("/docs", func(c echo.Context) error { return c.String(http.StatusOK, "Docs public endpoint") })
-	e.GET("/openapi.json", func(c echo.Context) error { return c.String(http.StatusOK, "OpenAPI public endpoint") })
-	e.GET("/redoc", func(c echo.Context) error { return c.String(http.StatusOK, "Redoc public endpoint") })
+	// Public routes
+	e.GET("/health", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Gateway is active and healthy")
+	})
+
+	e.GET("/docs", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Docs public endpoint")
+	})
+
+	e.GET("/openapi.json", func(c echo.Context) error {
+		return c.String(http.StatusOK, "OpenAPI public endpoint")
+	})
+
+	e.GET("/redoc", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Redoc public endpoint")
+	})
 
 	v1 := e.Group("/api/v1")
 
@@ -43,42 +54,55 @@ func main() {
 	if identityURLStr == "" {
 		identityURLStr = "http://identity:8000"
 	}
+
 	identityURL, err := url.Parse(identityURLStr)
 	if err != nil {
 		log.Fatalf("Invalid IDENTITY_SERVICE_URL: %v", err)
 	}
 
-	identityProxy := echomiddleware.Proxy(echomiddleware.NewRoundRobinBalancer([]*echomiddleware.ProxyTarget{
-		{URL: identityURL},
-	}))
+	identityProxy := echomiddleware.Proxy(
+		echomiddleware.NewRoundRobinBalancer(
+			[]*echomiddleware.ProxyTarget{
+				{URL: identityURL},
+			},
+		),
+	)
 
-	// 2. Public Auth Routes
-	v1.Group("/auth").Use(identityProxy)
+	// Public authentication routes.
+	// The wildcard route is required so Echo actually registers
+	// /api/v1/auth/* routes and the proxy middleware can handle them.
+	v1.Any("/auth/*", func(c echo.Context) error {
+		return echo.NewHTTPError(http.StatusNotFound, "Identity route not found")
+	}, identityProxy)
 
-	// 3. Protected Routes (Require JWT Auth)
-	protected := v1.Group("")
-	protected.Use(middleware.JWTAuth())
+	// Protected Identity routes.
+	// JWT validation runs before the request is proxied.
+	v1.Any("/users/*", func(c echo.Context) error {
+		return echo.NewHTTPError(http.StatusNotFound, "Identity route not found")
+	}, middleware.JWTAuth(), identityProxy)
 
-	// Proxy configured identity endpoints
-	protected.Group("/users").Use(identityProxy)
-
-	// Explicitly stub remaining contract routes with 502 Bad Gateway
-	protected.Any("/organizations/*", func(c echo.Context) error {
+	// Protected contract routes.
+	v1.Any("/organizations/*", func(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, "Organization service pending integration")
-	})
-	protected.Any("/policies/*", func(c echo.Context) error {
+	}, middleware.JWTAuth())
+
+	v1.Any("/policies/*", func(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, "Policy service pending integration")
-	})
-	protected.Any("/configuration/*", func(c echo.Context) error {
+	}, middleware.JWTAuth())
+
+	v1.Any("/configuration/*", func(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, "Configuration service pending integration")
-	})
-	protected.Any("/audit/*", func(c echo.Context) error {
+	}, middleware.JWTAuth())
+
+	v1.Any("/audit/*", func(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, "Audit service pending integration")
-	})
-	protected.Any("/secrets/*", func(c echo.Context) error {
+	}, middleware.JWTAuth())
+
+	v1.Any("/secrets/*", func(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, "Secrets service pending integration")
-	})
+	}, middleware.JWTAuth())
 
 	log.Printf("API Gateway starting up on port %s...", port)
+
 	e.Logger.Fatal(e.Start(":" + port))
 }
