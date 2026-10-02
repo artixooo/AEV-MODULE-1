@@ -3,6 +3,5 @@ __pycache__/
 .venv/
 .git
 .github
-tests
 docs
 .env

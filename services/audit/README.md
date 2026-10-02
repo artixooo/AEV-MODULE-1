@@ -55,4 +55,14 @@ services/audit/
 
 ---
 
-© AEV Module 1 – Audit Service
+# Week 3 Status
+
+| Deliverable | Status |
+|---|---|
+| Authentication Event Schema | Complete |
+| Audit Event Model | Complete |
+| Kafka Configuration | Complete |
+| Kafka Connectivity | Verified |
+| Database Connectivity | Verified |
+| API Documentation | Complete |
+| README | Updated |

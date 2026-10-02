@@ -17,7 +17,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 
 COPY --from=builder --chown=appuser:appgroup /api-gateway .
-COPY --chown=appuser:appgroup .env.example .
+
 
 USER appuser
 

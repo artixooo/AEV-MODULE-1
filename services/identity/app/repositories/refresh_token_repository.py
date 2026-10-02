@@ -79,4 +79,3 @@ def revoke_refresh_token(
     db.refresh(refresh_token)
 
     return refresh_token
-

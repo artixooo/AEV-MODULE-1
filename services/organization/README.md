@@ -1,285 +1,400 @@
+# AEV Module 1 - POD Alpha
+
 # Organization Service
 
-## Purpose
-
-The **Organization Service** is a core microservice in Pod Alpha (AEV Module 1) responsible for managing organizations, workspaces, projects, and memberships.
-
-## Current Status
-
-**Week 1 — Project Preparation & Verification**
-
-Week 1 establishes the Organization Service foundation. Business functionality and CRUD implementation are deferred to subsequent weeks.
+The Organization Service is a FastAPI-based microservice responsible for organization-related functionality within the POD Alpha platform. It includes database connectivity, authentication, JWT validation, tenant context handling, authorization, health checks, readiness checks, and automated testing.
 
 ---
 
-## Week 1 Verification
+## Project Overview
 
-The following Week 1 project preparation items were established and verified:
+POD Alpha is a microservices-based application consisting of multiple services that communicate through a shared backend network.
 
-- [x] FastAPI application structure established
-- [x] Database layer and SQLAlchemy Declarative Base configured
-- [x] Service-level Alembic environment connected to model metadata
-- [x] Centralized Organization migrations verified under `database/organization/migrations/`
-- [x] Approved Organization migration files identified
-- [x] Organization SQLAlchemy model created
-- [x] Pydantic schemas created
-- [x] Organization router skeleton registered
-- [x] Organization service-layer skeleton created
-- [x] Health endpoints (`/`, `/health`, `/ready`) prepared
-- [x] Unit test suite verified
-- [x] Dockerfile verified
-- [x] Documentation updated
+The Organization Service provides the following core capabilities:
 
-### Test Verification
-
-The Week 1 test suite was executed locally:
-
-```text
-Command: python -m pytest
-Result: 10 passed, 0 failed
-Execution time: 7.99 seconds
-```
+- Organization service initialization
+- PostgreSQL database connectivity
+- JWT-based authentication
+- Bearer token extraction
+- JWT claim validation
+- Tenant context creation
+- Permission-based authorization
+- Health monitoring
+- Database readiness verification
+- Automated unit testing
 
 ---
 
-## Architecture & Directory Structure
+# Week 1 - Project and Service Foundation
+
+## Objectives
+
+Week 1 focused on establishing the basic Organization Service structure and ensuring that the service could be developed and executed independently.
+
+## Completed Work
+
+- Created the Organization Service structure.
+- Configured the FastAPI application.
+- Added application configuration.
+- Added database configuration.
+- Added SQLAlchemy database integration.
+- Added PostgreSQL connectivity.
+- Added service health endpoints.
+- Added service readiness checks.
+- Added initial application models and schemas.
+- Added automated tests for the initial service components.
+- Integrated the Organization Service into Docker Compose.
+
+## Service Structure
+
+The Organization Service follows a modular structure:
 
 ```text
 services/organization/
 ├── app/
-│   ├── __init__.py
-│   ├── main.py                  # FastAPI application entrypoint
-│   │
-│   ├── api/                     # API/system endpoints
-│   │   ├── __init__.py
-│   │   └── health.py            # Health and readiness endpoints
-│   │
-│   ├── core/                    # Core configuration and logging
-│   │   ├── __init__.py
-│   │   ├── config.py
-│   │   └── logging.py
-│   │
-│   ├── db/                      # Database engine and session setup
-│   │   ├── __init__.py
-│   │   └── database.py
-│   │
-│   ├── models/                  # SQLAlchemy domain models
-│   │   ├── __init__.py
-│   │   └── organization.py
-│   │
-│   ├── routers/                 # FastAPI routers
-│   │   ├── __init__.py
-│   │   └── organization.py
-│   │
-│   ├── schemas/                 # Pydantic validation schemas
-│   │   ├── __init__.py
-│   │   └── organization.py
-│   │
-│   ├── services/                # Business logic layer
-│   │   ├── __init__.py
-│   │   └── organization.py
-│   │
-│   └── utils/                   # Helper functions
-│       └── __init__.py
-│
-├── migrations/                  # Service-level Alembic environment
-│   ├── env.py
-│   └── versions/
-│
-├── tests/                       # Service test suite
-│   ├── __init__.py
-│   ├── test_imports.py
-│   ├── test_health.py
-│   ├── test_config.py
-│   ├── test_db.py
-│   └── test_models_schemas.py
-│
-├── Dockerfile                   # Containerization definition
-├── alembic.ini                  # Alembic configuration
-├── requirements.txt             # Python dependencies
-└── README.md                    # Service documentation
+│   ├── core/
+│   ├── models/
+│   ├── schemas/
+│   └── service/application components
+├── tests/
+├── Dockerfile
+├── requirements.txt
+└── configuration files
 ```
 
----
+Week 2 - Authentication, Tenant Context and Authorization
+Objectives
 
-# Week 2 — Infrastructure Verification
+Week 2 focused on implementing the security foundation required by the Organization Service.
 
-Week 2 focused on verifying the Organization Service infrastructure, PostgreSQL integration, database schema, service health, Docker networking, graceful shutdown, and logging.
+The main areas were:
 
-## Week 2 Verification
+Authentication
+JWT claims
+Tenant context
+Permission checking
+Authorization
+Authentication
 
-The following Week 2 infrastructure items were verified:
+The Organization Service uses Bearer token authentication.
 
-- [x] PostgreSQL connection verified
-- [x] Organization database initialized
-- [x] Organization database migrations executed
-- [x] Organization database schema verified
-- [x] `/health` endpoint verified
-- [x] `/ready` endpoint verified with database connectivity
-- [x] Docker networking verified
-- [x] Graceful shutdown verified
-- [x] Logging configuration verified
+The authentication flow is:
 
----
+Receive an HTTP request.
+Extract the Authorization header.
+Verify that the authentication scheme is Bearer.
+Extract the JWT.
+Validate the JWT.
+Validate required JWT claims.
+Build the tenant context.
+Continue the request when authorization requirements are satisfied.
+JWT Authentication
 
-## Database Verification
+JWT validation is implemented through the security layer.
 
-The Organization Service successfully connected to PostgreSQL using:
+The JWT validation process checks:
 
-```text
-postgresql://postgres:postgres@postgres:5432/pod_alpha
-```
+JWT signature
+Configured signing algorithm
+Token validity
+Required sub claim
+Token expiration
+Invalid-token conditions
 
-The following Organization tables were created and verified:
+The service uses the configured JWT secret and algorithm rather than embedding authentication configuration directly into the authentication flow.
 
-```text
-organizations
-workspaces
-projects
-memberships
-```
+Tenant Context
 
-### Organization Migrations
+The Organization Service creates a tenant context from JWT claims.
 
-The approved centralized migration location is:
+The tenant context contains:
 
-```text
-database/organization/migrations/
-```
+User ID
+Tenant ID
 
-Migration files:
+A JWT subject (sub) is required.
 
-```text
-001_create_organizations.sql
-002_create_workspaces.sql
-003_create_projects.sql
-004_create_memberships.sql
-```
+When a tenant ID is available, the tenant context reports that tenant information is available.
 
----
+When a tenant ID is not included, the context remains valid but reports that tenant information is unavailable.
 
-## Health Verification
+When the JWT does not contain a required subject, the context creation process rejects the request.
 
-The Organization Service health endpoint was verified successfully:
+Authorization
 
-```text
+The service implements permission-based authorization.
+
+Permissions follow the organization permission format, for example:
+
+organization:read
+organization:write
+organization:delete
+
+The authorization layer supports:
+
+Checking whether a permission exists.
+Allowing requests with the required permission.
+Rejecting requests that do not have the required permission.
+
+Missing permissions result in HTTP 403 Forbidden.
+
+Week 3 - Security Integration, Configuration and Verification
+Objectives
+
+Week 3 focused on completing the security integration and addressing configuration, testing, documentation, and service verification requirements.
+
+Week 3 Changes
+1. JWT Import Consistency
+
+The authentication implementation was updated to use the JWT validation function provided by the security module.
+
+The security layer provides:
+
+Bearer token extraction
+JWT claim validation
+Authentication dependency handling
+
+JWT validation is performed through:
+
+validate_jwt_claims()
+
+This resolved the previous mismatch between the authentication and security modules.
+
+2. Environment-Based Database Configuration
+
+Hardcoded PostgreSQL credentials were removed from docker-compose.yml.
+
+The Organization Service now uses:
+
+DATABASE_URL: ${DATABASE_URL}
+
+Database credentials are supplied through environment configuration.
+
+The PostgreSQL service uses environment variables for:
+
+POSTGRES_USER
+POSTGRES_PASSWORD
+POSTGRES_DB
+
+Local development configuration is maintained through .env.
+
+The .env file contains environment-specific credentials and should not be committed to the repository.
+
+3. Security Test Improvements
+
+Security tests were expanded to verify:
+
+Bearer token extraction
+Missing authorization header
+Invalid authorization scheme
+Valid JWT validation
+Invalid JWT rejection
+Missing JWT subject rejection
+
+Duplicate security coverage was cleaned up while preserving unique test coverage across:
+
+test_security.py
+test_context.py
+test_authorization.py
+4. README Documentation
+
+The README was cleaned up so that it contains project documentation and verification evidence rather than Python test implementation code.
+
+The documentation covers:
+
+Week 1 work
+Week 2 work
+Week 3 work
+Security architecture
+Tenant context
+Authorization
+Environment configuration
+Verification results
+
+Week 3 Verification Evidence
+
+The following verification was completed for the Organization Service.
+
+1. Bearer Token Extraction
+
+Verified that a valid Authorization header using the Bearer scheme correctly extracts the token.
+
+Result: PASSED
+
+Test:
+
+test_bearer_token_extraction
+
+2. JWT Validation
+
+Verified that a correctly signed JWT can be decoded and validated using the configured JWT secret and algorithm.
+
+Result: PASSED
+
+Test:
+
+test_valid_jwt_claims
+
+3. Invalid JWT Rejection
+
+Verified that an invalid JWT is rejected by the authentication layer.
+
+Result: PASSED
+
+Test:
+
+test_invalid_jwt_is_rejected
+
+4. Missing sub Claim Rejection
+
+Verified that a JWT without the required sub claim is rejected.
+
+Result: PASSED
+
+Test:
+
+test_jwt_missing_sub_is_rejected
+
+5. Tenant Context Creation
+
+Verified tenant context behavior for:
+
+JWT containing a tenant ID
+JWT without a tenant ID
+JWT without the required subject
+
+Result: PASSED
+
+Verified behavior includes:
+
+Correct user ID extraction
+Correct tenant ID extraction
+Tenant availability detection
+Required subject validation
+6. Permission Authorization
+
+Verified that users with the required permission are allowed access.
+
+Result: PASSED
+
+Also verified that users without the required permission are rejected.
+
+Result: PASSED
+
+Expected denial response:
+
+HTTP 403 Forbidden
+
+Test:
+
+test_require_permission_denies_access
+
+Service Verification
+Organization Container
+
+The Organization Service was successfully started through Docker Compose.
+
+The service exposes host port:
+
+8003
+
+which maps to the Organization Service application port:
+
+8001
+
+Docker Compose mapping:
+
+8003:8001
+
+Health Check
+
+The Organization Service health endpoint was verified using:
+
 GET /health
-```
 
-**HTTP 200**
+Result: HTTP 200 OK
 
 Response:
 
-```json
-{
-  "status": "healthy",
-  "service": "organization-service"
-}
-```
+{"status":"healthy","service":"organization-service"}
 
----
+Readiness Check
 
-## Readiness Verification
+The Organization Service readiness endpoint was verified using:
 
-The Organization Service readiness endpoint was verified successfully:
-
-```text
 GET /ready
-```
 
-**HTTP 200**
+Result: HTTP 200 OK
 
 Response:
 
-```json
-{
-  "status": "ready",
-  "database": "connected"
-}
-```
+{"status":"ready","database":"connected"}
 
-This confirms that the Organization Service can successfully connect to PostgreSQL.
+This confirms that the Organization Service is running and can connect to the PostgreSQL database.
 
----
+Automated Test Verification
 
-## Docker Networking
+The Organization Service test suite was executed using:
 
-The Organization container successfully resolved the PostgreSQL container through Docker DNS:
+python -m pytest -v
 
-```text
-postgres → 172.18.0.8
-```
+Final Verification Result
 
-This verifies container-to-container DNS connectivity.
+23 passed in 4.95s
 
----
-
-## Graceful Shutdown
-
-The Organization Service was started independently and stopped using Docker.
-
-The container exited successfully:
+Full terminal output:
 
 ```text
-ExitCode=0
+============================================================================= test session starts =============================================================================
+platform win32 -- Python 3.14.3, pytest-9.1.1, pluggy-1.6.0
+collected 23 items
+
+tests/test_authorization.py::test_permission_is_granted PASSED
+tests/test_authorization.py::test_permission_is_denied PASSED
+tests/test_authorization.py::test_require_permission_allows_access PASSED
+tests/test_authorization.py::test_require_permission_denies_access PASSED
+tests/test_config.py::TestConfig::test_config_loading PASSED
+tests/test_config.py::TestConfig::test_custom_settings_instantiation PASSED
+tests/test_context.py::test_build_tenant_context_with_tenant PASSED
+tests/test_context.py::test_build_tenant_context_without_tenant PASSED
+tests/test_context.py::test_build_tenant_context_requires_subject PASSED
+tests/test_db.py::TestDatabase::test_db_setup PASSED
+tests/test_db.py::TestDatabase::test_get_db_generator PASSED
+tests/test_health.py::TestHealthEndpoints::test_health_endpoint PASSED
+tests/test_health.py::TestHealthEndpoints::test_ready_endpoint PASSED
+tests/test_health.py::TestHealthEndpoints::test_root_endpoint PASSED
+tests/test_imports.py::TestImports::test_imports PASSED
+tests/test_models_schemas.py::TestModelsAndSchemas::test_organization_model_instantiation PASSED
+tests/test_models_schemas.py::TestModelsAndSchemas::test_organization_schemas PASSED
+tests/test_security.py::test_bearer_token_extraction PASSED
+tests/test_security.py::test_missing_authorization_header PASSED
+tests/test_security.py::test_invalid_authorization_scheme PASSED
+tests/test_security.py::test_valid_jwt_claims PASSED
+tests/test_security.py::test_invalid_jwt_is_rejected PASSED
+tests/test_security.py::test_jwt_missing_sub_is_rejected PASSED
+
+============================================================================= 23 passed in 4.95s =============================================================================
 ```
 
-The service logs confirmed:
-
+**Result: 23/23 tests passed successfully.**
 ```text
-Shutting down
-Waiting for application shutdown.
-Organization Service stopped
-Application shutdown complete.
-Finished server process
-```
 
-This verifies that the Organization Service performs a clean application shutdown.
+Test coverage includes:
 
----
+Authorization
+Configuration
+Tenant context
+Database
+Health checks
+Imports
+Models and schemas
+Security
+JWT validation
+Bearer authentication
 
-## Logging Verification
-
-The Organization Service uses Python's standard `logging` module.
-
-Configuration:
-
-```text
-Log Level: INFO
-Logger: organization-service
-Format: %(asctime)s | %(levelname)s | %(message)s
-```
-
-Startup and shutdown lifecycle events were successfully recorded in the service logs.
-
----
-
-## Testing
-
-The Organization Service test suite was verified during Week 1:
-
-```text
-Command: python -m pytest
-Result: 10 passed, 0 failed
-```
-
----
-
-## Current Scope
-
-Week 2 focuses on infrastructure verification:
-
-- PostgreSQL connectivity
-- Database initialization
-- Database migrations
-- Database schema verification
-- Health endpoint
-- Readiness endpoint
-- Docker networking
-- Graceful shutdown
-- Logging
-
-Business functionality and CRUD implementation are deferred to subsequent weeks.
-
-> [!NOTE]
-> The Organization Service was independently verified using `docker compose up -d organization --no-deps`. The full Docker Compose startup chain currently has a separate Identity Service dependency issue.
+## Authentication & Architecture Contracts
+For detailed architectural flows, token contracts, and RBAC specifications:
+- [Gateway Authentication Flow](../../docs/architecture/gateway-auth-flow.md)
+- [JWT Authentication Flow & Claims Contract](../../docs/architecture/jwt-auth-flow.md)
+- [RBAC Architecture & Roles Model](../../docs/architecture/rbac-architecture.md)
+- [Authentication Setup & Verification Guide](../../docs/setup/authentication-setup-guide.md)

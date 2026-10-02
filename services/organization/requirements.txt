@@ -2,8 +2,10 @@ fastapi
 uvicorn[standard]
 sqlalchemy
 psycopg2-binary
+psycopg
 pydantic
 pydantic-settings
 python-dotenv
 pytest
 httpx
+PyJWT
