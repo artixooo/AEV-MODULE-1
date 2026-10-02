@@ -1,71 +1,62 @@
-import hashlib
-import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from app.models.refresh_token import RefreshToken
-
-
-def hash_token(token: str) -> str:
-    return hashlib.sha256(
-        token.encode("utf-8")
-    ).hexdigest()
+from app.repositories.refresh_token_repository import (
+    create_refresh_token,
+    get_refresh_token,
+    is_refresh_token_valid,
+    revoke_refresh_token,
+)
 
 
 def save_refresh_token(
     db: Session,
-    user_id: uuid.UUID,
-    session_id: uuid.UUID,
+    user_id,
+    session_id,
     token: str,
-    expires_at: datetime
+    expires_at: datetime,
 ):
-    refresh_token = RefreshToken(
+    return create_refresh_token(
+        db=db,
         user_id=user_id,
         session_id=session_id,
-        token_hash=hash_token(token),
-        expires_at=expires_at
+        token=token,
+        expires_at=expires_at,
     )
 
-    db.add(refresh_token)
-    db.commit()
-    db.refresh(refresh_token)
+
+def get_refresh_token_by_token(
+    db: Session,
+    token: str,
+):
+    refresh_token = get_refresh_token(
+        db=db,
+        token=token,
+    )
+
+    if not refresh_token:
+        return None
+
+    if not is_refresh_token_valid(refresh_token):
+        return None
 
     return refresh_token
 
 
-def get_refresh_token(
+def revoke_refresh_token_by_token(
     db: Session,
-    token: str
+    token: str,
 ):
-    token_hash = hash_token(token)
-
-    return (
-        db.query(RefreshToken)
-        .filter(
-            RefreshToken.token_hash == token_hash,
-            RefreshToken.revoked.is_(False),
-            RefreshToken.expires_at > datetime.now(timezone.utc)
-        )
-        .first()
+    refresh_token = get_refresh_token_by_token(
+        db=db,
+        token=token,
     )
 
-
-def revoke_refresh_token(
-    db: Session,
-    token: str
-):
-    stored_token = get_refresh_token(
-        db,
-        token
-    )
-
-    if not stored_token:
+    if not refresh_token:
         return None
 
-    stored_token.revoked = True
-    stored_token.revoked_at = datetime.now(timezone.utc)
-
-    db.commit()
-
-    return stored_token
+    return revoke_refresh_token(
+        db=db,
+        refresh_token=refresh_token,
+    )

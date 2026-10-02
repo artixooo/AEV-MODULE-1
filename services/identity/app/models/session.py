@@ -56,7 +56,8 @@ class Session(Base):
 
     is_active = Column(
         Boolean,
-        default=True
+        default=True,
+        nullable=False
     )
 
     expires_at = Column(
