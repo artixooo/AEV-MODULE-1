@@ -309,3 +309,36 @@ func (r *PostgresRepository) ListFeatureFlags(ctx context.Context, filter ListFi
 	}
 	return flags, rows.Err()
 }
+
+// DeleteConfig removes a configuration row by config_key. Writes a final
+// audit row to configuration_history recording the deleted value before
+// removal, so the history remains a complete record even after deletion.
+func (r *PostgresRepository) DeleteConfig(ctx context.Context, key string) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	var id, oldValue string
+	err = tx.QueryRow(ctx,
+		`SELECT id::text, config_value FROM configuration WHERE config_key = $1 FOR UPDATE`,
+		key,
+	).Scan(&id, &oldValue)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+
+	if err := insertHistory(ctx, tx, id, &oldValue, "", nil, "configuration deleted"); err != nil {
+		return err
+	}
+
+	if _, err := tx.Exec(ctx, `DELETE FROM configuration WHERE id = $1`, id); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}

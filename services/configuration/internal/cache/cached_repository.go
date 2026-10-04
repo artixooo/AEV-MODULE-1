@@ -130,3 +130,11 @@ func (c *CachedRepository) ListFeatureFlags(ctx context.Context, filter reposito
 // migration/backfill) rather than through this repository.
 func (c *CachedRepository) InvalidateConfig(key string) { c.c.Delete(configCacheKey(key)) }
 func (c *CachedRepository) InvalidateFlag(key string)   { c.c.Delete(flagCacheKey(key)) }
+
+func (c *CachedRepository) DeleteConfig(ctx context.Context, key string) error {
+	if err := c.repo.DeleteConfig(ctx, key); err != nil {
+		return err
+	}
+	c.c.Delete(configCacheKey(key))
+	return nil
+}

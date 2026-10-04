@@ -52,6 +52,7 @@ type Repository interface {
 	// Configuration
 	GetConfig(ctx context.Context, key string) (*Configuration, error)
 	SaveConfig(ctx context.Context, input SaveConfigInput) (*Configuration, error)
+	DeleteConfig(ctx context.Context, key string) error
 	ListConfigurations(ctx context.Context, filter ListFilter) ([]Configuration, error)
 	GetConfigurationHistory(ctx context.Context, configurationID string) ([]ConfigurationHistory, error)
 

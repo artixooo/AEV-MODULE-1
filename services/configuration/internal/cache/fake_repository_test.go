@@ -11,15 +11,16 @@ import (
 // Postgres. It tracks call counts so tests can assert whether a request
 // was served from the cache or had to fall through.
 type fakeRepository struct {
-	configs      map[string]*repository.Configuration
-	flags        map[string]*repository.FeatureFlag
-	getConfigN   int
-	saveConfigN  int
-	getFlagN     int
-	saveFlagN    int
-	listConfigsN int
-	listFlagsN   int
-	historyN     int
+	configs       map[string]*repository.Configuration
+	flags         map[string]*repository.FeatureFlag
+	getConfigN    int
+	saveConfigN   int
+	deleteConfigN int
+	getFlagN      int
+	saveFlagN     int
+	listConfigsN  int
+	listFlagsN    int
+	historyN      int
 }
 
 func newFakeRepository() *fakeRepository {
@@ -104,4 +105,12 @@ func (f *fakeRepository) ListFeatureFlags(ctx context.Context, filter repository
 		out = append(out, *flag)
 	}
 	return out, nil
+}
+func (f *fakeRepository) DeleteConfig(ctx context.Context, key string) error {
+	f.deleteConfigN++
+	if _, ok := f.configs[key]; !ok {
+		return repository.ErrNotFound
+	}
+	delete(f.configs, key)
+	return nil
 }
