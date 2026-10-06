@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 import jwt
 from fastapi import Depends, HTTPException, Request, status
@@ -88,7 +88,7 @@ def validate_jwt_claims(token: str) -> dict[str, Any]:
 
 
 async def get_authenticated_claims(
-    credentials: HTTPAuthorizationCredentials | None = Depends(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(
         bearer_scheme
     ),
 ) -> dict[str, Any]:
