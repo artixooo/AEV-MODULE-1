@@ -38,6 +38,7 @@ from app.repositories.refresh_token_repository import (
 )
 
 from app.repositories.session_repository import (
+    create_session,
     get_session_by_id,
     is_session_valid,
     revoke_session,
@@ -288,16 +289,20 @@ def register_user(
 
 def issue_access_token(
     user: User,
+    session_id: uuid.UUID | str | None = None,
 ) -> str:
-    """Create an access token for a user."""
+    """Create an access token for a user and optionally bind it to a session."""
 
-    return create_access_token(
-        {
-            "sub": str(user.id),
-            "email": user.email,
-            "tenant_id": str(user.tenant_id),
-        }
-    )
+    claims = {
+        "sub": str(user.id),
+        "email": user.email,
+        "tenant_id": str(user.tenant_id),
+    }
+
+    if session_id is not None:
+        claims["sid"] = str(session_id)
+
+    return create_access_token(claims)
 
 
 def issue_token_pair(
@@ -307,33 +312,36 @@ def issue_token_pair(
     """
     Create an access/refresh token pair and persist the refresh token
     in PostgreSQL.
+
+    The session identifier is non-secret and is stored in both JWTs.
+    The raw refresh token is never stored in the sessions table.
     """
-
-    access_token = issue_access_token(user)
-
-    refresh_token = create_refresh_token(
-        {
-            "sub": str(user.id),
-            "email": user.email,
-            "tenant_id": str(user.tenant_id),
-        }
-    )
 
     refresh_expires_at = (
         datetime.now(timezone.utc)
         + timedelta(days=7)
     )
 
-    user_session = UserSession(
+    user_session = create_session(
+        db=db,
         user_id=user.id,
         tenant_id=user.tenant_id,
-        session_token=refresh_token,
         expires_at=refresh_expires_at,
     )
 
-    db.add(user_session)
-    db.flush()
+    refresh_token = create_refresh_token(
+        {
+            "sub": str(user.id),
+            "email": user.email,
+            "tenant_id": str(user.tenant_id),
+            "sid": str(user_session.id),
+        }
+    )
 
+    access_token = issue_access_token(
+        user=user,
+        session_id=user_session.id,
+    )
 
     persist_refresh_token(
         db=db,
@@ -342,6 +350,7 @@ def issue_token_pair(
         token=refresh_token,
         expires_at=refresh_expires_at,
     )
+
     db.commit()
     db.refresh(user_session)
 
@@ -421,6 +430,7 @@ def refresh(
     payload = decode_refresh_token(refresh_token)
 
     user_id = payload.get("sub")
+    session_id = payload.get("sid")
 
     if not user_id:
         raise TokenInvalidError(
@@ -428,10 +438,30 @@ def refresh(
             error_code="INVALID_TOKEN_PAYLOAD",
         )
 
+    if not session_id:
+        raise TokenInvalidError(
+            detail="Refresh token payload is missing the session identifier",
+            error_code="INVALID_TOKEN_PAYLOAD",
+        )
+
+    try:
+        session_uuid = uuid.UUID(str(session_id))
+    except ValueError:
+        raise TokenInvalidError(
+            detail="Refresh token contains an invalid session identifier",
+            error_code="INVALID_TOKEN_PAYLOAD",
+        )
+
     session = get_session_by_id(
         db=db,
         session_id=stored_token.session_id,
     )
+
+    if session_uuid != stored_token.session_id:
+        raise TokenInvalidError(
+            detail="Refresh token session validation failed",
+            error_code="INVALID_SESSION",
+        )
 
     if not session:
         raise TokenInvalidError(
@@ -503,7 +533,8 @@ def refresh(
 
     # Issue a new access token.
     new_access_token = issue_access_token(
-        user
+        user=user,
+        session_id=session.id,
     )
 
     # Issue a new refresh token.
@@ -512,6 +543,7 @@ def refresh(
             "sub": str(user.id),
             "email": user.email,
             "tenant_id": str(user.tenant_id),
+            "sid": str(session.id),
         }
     )
 

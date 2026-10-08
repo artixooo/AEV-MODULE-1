@@ -26,7 +26,6 @@ def test_transaction_rollback(db_session):
     db_session.commit()
     db_session.refresh(user)
 
-    session_token = uuid.uuid4().hex
     refresh_token = "rollback-refresh-token"
 
     expires_at = (
@@ -38,7 +37,6 @@ def test_transaction_rollback(db_session):
         db=db_session,
         user_id=user.id,
         tenant_id=user.tenant_id,
-        session_token=session_token,
         expires_at=expires_at,
     )
 

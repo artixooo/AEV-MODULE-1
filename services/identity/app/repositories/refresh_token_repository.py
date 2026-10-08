@@ -79,3 +79,53 @@ def revoke_refresh_token(
     db.refresh(refresh_token)
 
     return refresh_token
+
+def revoke_refresh_tokens_by_session(
+    db: Session,
+    session_id,
+):
+    now = datetime.now(timezone.utc)
+
+    tokens = (
+        db.query(RefreshToken)
+        .filter(
+            RefreshToken.session_id == session_id,
+            RefreshToken.revoked.is_(False),
+        )
+        .all()
+    )
+
+    for token in tokens:
+        token.revoked = True
+        token.revoked_at = now
+
+    db.flush()
+
+    return tokens
+
+
+def revoke_refresh_tokens_by_sessions(
+    db: Session,
+    session_ids,
+):
+    now = datetime.now(timezone.utc)
+
+    if not session_ids:
+        return []
+
+    tokens = (
+        db.query(RefreshToken)
+        .filter(
+            RefreshToken.session_id.in_(session_ids),
+            RefreshToken.revoked.is_(False),
+        )
+        .all()
+    )
+
+    for token in tokens:
+        token.revoked = True
+        token.revoked_at = now
+
+    db.flush()
+
+    return tokens

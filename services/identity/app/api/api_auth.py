@@ -82,3 +82,32 @@ class AuthErrorResponse(BaseModel):
             "error_code": "INVALID_CREDENTIALS",
         }
     })
+
+
+class SessionResponse(BaseModel):
+    """Session information exposed by the session-management API."""
+
+    id: str
+    user_id: str
+    tenant_id: str
+    device_name: str | None = None
+    device_type: str | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
+    is_active: bool
+    expires_at: str
+    last_activity: str | None = None
+    created_at: str | None = None
+
+
+class SessionListResponse(BaseModel):
+    """Returned by GET /api/v1/auth/sessions."""
+
+    sessions: list[SessionResponse]
+
+
+class SessionActionResponse(BaseModel):
+    """Returned after a session-management action."""
+
+    message: str
+    session_id: str | None = None

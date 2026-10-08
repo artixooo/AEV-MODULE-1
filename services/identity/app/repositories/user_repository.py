@@ -37,3 +37,13 @@ def get_user_by_email_or_username(
         )
         .first()
     )
+
+def get_user_by_id(
+    db: Session,
+    user_id,
+):
+    return (
+        db.query(User)
+        .filter(User.id == user_id)
+        .first()
+    )

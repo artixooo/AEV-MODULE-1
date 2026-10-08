@@ -11,66 +11,60 @@ class Session(Base):
     id = Column(
         UUID(as_uuid=True),
         primary_key=True,
-        server_default=func.gen_random_uuid()
+        server_default=func.gen_random_uuid(),
     )
 
     user_id = Column(
         UUID(as_uuid=True),
         ForeignKey(
             "users.id",
-            ondelete="CASCADE"
+            ondelete="CASCADE",
         ),
-        nullable=False
+        nullable=False,
     )
 
     tenant_id = Column(
         UUID(as_uuid=True),
-        nullable=False
-    )
-
-    session_token = Column(
-        Text,
         nullable=False,
-        unique=True
     )
 
     device_name = Column(
         String(150),
-        nullable=True
+        nullable=True,
     )
 
     device_type = Column(
         String(50),
-        nullable=True
+        nullable=True,
     )
 
     ip_address = Column(
         String(50),
-        nullable=True
+        nullable=True,
     )
 
     user_agent = Column(
         Text,
-        nullable=True
+        nullable=True,
     )
 
     is_active = Column(
         Boolean,
         default=True,
-        nullable=False
+        nullable=False,
     )
 
     expires_at = Column(
         DateTime,
-        nullable=False
+        nullable=False,
     )
 
     last_activity = Column(
         DateTime,
-        server_default=func.current_timestamp()
+        server_default=func.current_timestamp(),
     )
 
     created_at = Column(
         DateTime,
-        server_default=func.current_timestamp()
+        server_default=func.current_timestamp(),
     )

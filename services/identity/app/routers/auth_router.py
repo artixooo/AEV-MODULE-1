@@ -11,8 +11,12 @@ from app.api.api_auth import (
     RefreshResponse,
     TokenResponse,
 )
+from app.api.api_auth_deps import get_current_user_id
 from app.core.database import get_db
-from app.repositories.user_repository import get_user_by_email
+from app.repositories.user_repository import (
+    get_user_by_email,
+    get_user_by_id,
+)
 from app.schemas.user_schema import UserCreate, UserResponse
 from app.services.auth_service import (
     AuthError,
@@ -21,7 +25,6 @@ from app.services.auth_service import (
     refresh as refresh_tokens,
 )
 from app.services.user_service import create_user
-from app.utils.jwt import verify_token
 
 
 router = APIRouter(
@@ -89,13 +92,19 @@ def login(
 
 @router.get("/profile")
 def profile(
-    payload: dict = Depends(verify_token),
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
 ):
+    user = get_user_by_id(
+        db,
+        user_id,
+    )
+
     return {
         "message": "JWT verification successful",
-        "user_id": payload.get("sub"),
-        "email": payload.get("email"),
-        "tenant_id": payload.get("tenant_id"),
+        "user_id": user_id,
+        "email": user.email if user else None,
+        "tenant_id": str(user.tenant_id) if user else None,
     }
 
 
