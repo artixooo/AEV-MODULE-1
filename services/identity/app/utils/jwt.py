@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import uuid
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -49,7 +50,8 @@ def create_refresh_token(
     to_encode.update(
         {
             "exp": expire,
-            "type": "refresh"
+            "type": "refresh",
+            "jti": str(uuid.uuid4()),
         }
     )
 
