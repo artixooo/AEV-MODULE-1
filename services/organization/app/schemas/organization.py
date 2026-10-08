@@ -47,3 +47,30 @@ class OrganizationResponse(OrganizationBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TenantQuotaBase(BaseModel):
+    quota_name: str
+    limit_value: int
+    unit: str
+    description: Optional[str] = None
+
+
+class TenantQuotaCreate(TenantQuotaBase):
+    pass
+
+
+class TenantQuotaUpdate(BaseModel):
+    quota_name: Optional[str] = None
+    limit_value: Optional[int] = None
+    unit: Optional[str] = None
+    description: Optional[str] = None
+
+
+class TenantQuotaResponse(TenantQuotaBase):
+    id: UUID
+    tenant_id: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

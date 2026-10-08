@@ -9,6 +9,7 @@ from app.routers.organization import router as organization_router
 from app.routers.membership import router as membership_router
 from app.routers.workspace import router as workspace_router
 from app.routers.project import router as project_router
+from app.routers.quota import router as quota_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,3 +43,4 @@ app.include_router(organization_router)
 app.include_router(membership_router)
 app.include_router(workspace_router)
 app.include_router(project_router)
+app.include_router(quota_router)
