@@ -36,7 +36,11 @@ static_resources:
                             prefix: "/"
                           route:
                             cluster: go_gateway_cluster
-                            timeout: 15s
+                            timeout: 10s
+                            retry_policy:
+                              retry_on: "5xx,gateway-error,connect-failure,refused-stream"
+                              num_retries: 3
+                              per_try_timeout: 3s
 
   clusters:
     - name: go_gateway_cluster

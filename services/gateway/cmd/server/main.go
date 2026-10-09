@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"log"
@@ -13,15 +13,32 @@ import (
 	echomiddleware "github.com/labstack/echo/v4/middleware"
 )
 
+// injectServiceKey injects the internal API key for downstream service-to-service auth
+func injectServiceKey(key string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			if key != "" {
+				c.Request().Header.Set("X-Service-API-Key", key)
+			}
+			return next(c)
+		}
+	}
+}
+
+func getEnvOrDefault(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("DEBUG: No .env file found, relying on system/container environment variables")
 	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	port := getEnvOrDefault("PORT", "8080")
+	serviceAPIKey := os.Getenv("SERVICE_API_KEY")
 
 	e := echo.New()
 
@@ -31,7 +48,10 @@ func main() {
 	e.Server.ReadTimeout = 10 * time.Second
 	e.Server.WriteTimeout = 10 * time.Second
 
+<<<<<<< HEAD
+=======
 	// Public routes
+>>>>>>> d5c4b9c3ab522147e900c8d47ffad2d71b08069f
 	e.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Gateway is active and healthy")
 	})
@@ -49,6 +69,7 @@ func main() {
 	})
 
 	v1 := e.Group("/api/v1")
+	v1.Use(injectServiceKey(serviceAPIKey))
 
 	identityURLStr := os.Getenv("IDENTITY_SERVICE_URL")
 	if identityURLStr == "" {
@@ -68,41 +89,42 @@ func main() {
 		),
 	)
 
-	// Public authentication routes.
-	// The wildcard route is required so Echo actually registers
-	// /api/v1/auth/* routes and the proxy middleware can handle them.
-	v1.Any("/auth/*", func(c echo.Context) error {
-		return echo.NewHTTPError(http.StatusNotFound, "Identity route not found")
-	}, identityProxy)
+	// Public authentication routes
+	v1.Any("/auth", func(c echo.Context) error { return echo.NewHTTPError(http.StatusNotFound, "Identity route not found") }, identityProxy)
+	v1.Any("/auth/*", func(c echo.Context) error { return echo.NewHTTPError(http.StatusNotFound, "Identity route not found") }, identityProxy)
 
-	// Protected Identity routes.
-	// JWT validation runs before the request is proxied.
-	v1.Any("/users/*", func(c echo.Context) error {
-		return echo.NewHTTPError(http.StatusNotFound, "Identity route not found")
-	}, middleware.JWTAuth(), identityProxy)
+	// Protected Identity routes
+	v1.Any("/users", func(c echo.Context) error { return echo.NewHTTPError(http.StatusNotFound, "Identity route not found") }, middleware.JWTAuth(), identityProxy)
+	v1.Any("/users/*", func(c echo.Context) error { return echo.NewHTTPError(http.StatusNotFound, "Identity route not found") }, middleware.JWTAuth(), identityProxy)
 
-	// Protected contract routes.
-	v1.Any("/organizations/*", func(c echo.Context) error {
-		return echo.NewHTTPError(http.StatusBadGateway, "Organization service pending integration")
-	}, middleware.JWTAuth())
+	// Protected contract routes (mapped to both exact and wildcard paths to fix 404s)
+	v1.Any("/organizations", stubHandler("Organization"), middleware.JWTAuth())
+	v1.Any("/organizations/*", stubHandler("Organization"), middleware.JWTAuth())
 
-	v1.Any("/policies/*", func(c echo.Context) error {
-		return echo.NewHTTPError(http.StatusBadGateway, "Policy service pending integration")
-	}, middleware.JWTAuth())
+	v1.Any("/policies", stubHandler("Policy"), middleware.JWTAuth())
+	v1.Any("/policies/*", stubHandler("Policy"), middleware.JWTAuth())
 
-	v1.Any("/configuration/*", func(c echo.Context) error {
-		return echo.NewHTTPError(http.StatusBadGateway, "Configuration service pending integration")
-	}, middleware.JWTAuth())
+	v1.Any("/configuration", stubHandler("Configuration"), middleware.JWTAuth())
+	v1.Any("/configuration/*", stubHandler("Configuration"), middleware.JWTAuth())
 
-	v1.Any("/audit/*", func(c echo.Context) error {
-		return echo.NewHTTPError(http.StatusBadGateway, "Audit service pending integration")
-	}, middleware.JWTAuth())
+	v1.Any("/audit", stubHandler("Audit"), middleware.JWTAuth())
+	v1.Any("/audit/*", stubHandler("Audit"), middleware.JWTAuth())
 
+<<<<<<< HEAD
+	v1.Any("/secrets", stubHandler("Secrets"), middleware.JWTAuth())
+	v1.Any("/secrets/*", stubHandler("Secrets"), middleware.JWTAuth())
+=======
 	v1.Any("/secrets/*", func(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadGateway, "Secrets service pending integration")
 	}, middleware.JWTAuth())
+>>>>>>> d5c4b9c3ab522147e900c8d47ffad2d71b08069f
 
 	log.Printf("API Gateway starting up on port %s...", port)
-
 	e.Logger.Fatal(e.Start(":" + port))
+}
+
+func stubHandler(serviceName string) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return echo.NewHTTPError(http.StatusBadGateway, serviceName+" service pending integration")
+	}
 }

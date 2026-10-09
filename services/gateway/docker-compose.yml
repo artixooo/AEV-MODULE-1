@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile.envoy
     ports:
-      - "10000:10000"
+      - "8080:10000"
     networks:
       - gateway-net
     depends_on:
@@ -18,11 +18,36 @@ services:
       - .env
     environment:
       - PORT=8080
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_SECRET_KEY=this_is_a_very_secure_secret_key_that_is_32_chars
+      - SERVICE_API_KEY=dev_internal_key_123
+      - IDENTITY_SERVICE_URL=http://identity:8000
+      - ORGANIZATION_SERVICE_URL=http://organization:8000
+      - POLICY_SERVICE_URL=http://policy:8000
+      - REDIS_URL=redis:6379
+    networks:
+      - gateway-net
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:8-alpine
+    container_name: gateway-redis
     networks:
       - gateway-net
 
   identity:
+    image: traefik/whoami
+    command: --port 8000
+    networks:
+      - gateway-net
+
+  organization:
+    image: traefik/whoami
+    command: --port 8000
+    networks:
+      - gateway-net
+
+  policy:
     image: traefik/whoami
     command: --port 8000
     networks:
