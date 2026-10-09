@@ -20,6 +20,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", handlers.HealthHandler(db))
+	mux.HandleFunc("/ledger", handlers.LedgerHandler(db))
+	mux.HandleFunc("/verify", handlers.VerifyHandler(db))
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,

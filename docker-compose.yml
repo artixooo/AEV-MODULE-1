@@ -473,4 +473,22 @@ services:
       timeout: 5s
       retries: 5
 
+  console:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: pod-alpha/console
+    container_name: console
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+    restart: unless-stopped
+    networks:
+      - backend
+    depends_on:
+      gateway:
+        condition: service_started
+
+
 

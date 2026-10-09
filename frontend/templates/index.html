@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYART AEV - Pod Alpha Administration Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation (Matching Proposal Figures 7.1 - 10.1) -->
+    <aside class="sidebar">
+      <div class="brand-section">
+        <div class="brand-logo">CY</div>
+        <div class="brand-text">
+          <h1>CYART AEV</h1>
+          <p>Pod Alpha Substrate</p>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <div class="nav-item active" data-view="view-dashboard" id="nav-dashboard">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard Overview
+        </div>
+
+        <div class="nav-item" data-view="view-sso" id="nav-sso">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          Identity Providers
+        </div>
+
+        <div class="nav-item" data-view="view-policies" id="nav-policies">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Access Policies
+        </div>
+
+        <div class="nav-item" data-view="view-audit" id="nav-audit">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+          Audit Ledger
+        </div>
+
+        <div class="nav-item" data-view="view-vault" id="nav-vault">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+          Key Vault
+        </div>
+
+        <div class="nav-item" data-view="view-flags" id="nav-flags">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Configuration Flags
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div>Pod Alpha Foundation v1.0</div>
+        <div class="author-pill">
+          <span class="dot"></span>
+          <span>Lead: Farhan Bahadure</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Viewport -->
+    <main class="main-wrapper">
+      <!-- Top Meta Bar -->
+      <header class="top-bar">
+        <div class="top-bar-title">
+          <h2>AEV Platform Substrate</h2>
+          <span class="badge-tag">Production Ready</span>
+        </div>
+        <div class="top-bar-meta">
+          <span class="status-badge vault-unsealed">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            Vault: Unsealed
+          </span>
+          <span class="tenant-id-pill">TENANT ID: 01890123-4567-7abc</span>
+        </div>
+      </header>
+
+      <section class="content-viewport">
+        
+        <!-- ================================================================
+             1. DASHBOARD OVERVIEW (Figure 7.1)
+             ================================================================ -->
+        <div class="view-panel active" id="view-dashboard">
+          <div class="page-header">
+            <div>
+              <h2>Dashboard Overview</h2>
+              <p>Real-time telemetry and operational health metrics of the Pod Alpha foundation substrate.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="loadDashboardData()">Refresh Telemetry</button>
+          </div>
+
+          <!-- Top Metric Cards -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">Active Tenants</div>
+              <div class="metric-value" id="stat-tenants">84</div>
+              <div class="metric-sub">Logical RLS isolated orgs</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">System Identities</div>
+              <div class="metric-value" id="stat-identities">2,410</div>
+              <div class="metric-sub">Provisioned OIDC users</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">Gateway Load (RPS)</div>
+              <div class="metric-value" id="stat-rps">8,412</div>
+              <div class="metric-sub">p99 latency 14ms (10k cap)</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">Vault Secrets</div>
+              <div class="metric-value" id="stat-secrets">156</div>
+              <div class="metric-sub">Dynamic short-lived credentials</div>
+            </div>
+          </div>
+
+          <!-- Two Columns: Microservices Health & Alerts -->
+          <div class="dashboard-columns">
+            <div class="card-panel">
+              <div class="panel-title">
+                <span>Microservices Health Status</span>
+                <span class="badge-status active">All Systems Nominal</span>
+              </div>
+              <div class="service-list" id="microservices-list">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+
+            <div class="card-panel">
+              <div class="panel-title">
+                <span>Recent System Alerts</span>
+              </div>
+              <div class="alerts-list" id="alerts-list">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             2. ENTERPRISE IDENTITY PROVIDERS (SSO) (Figure 7.2 & 8.1)
+             ================================================================ -->
+        <div class="view-panel" id="view-sso">
+          <div class="page-header">
+            <div>
+              <h2>Enterprise Identity Providers (SSO)</h2>
+              <p>Manage single sign-on (SSO) configurations and client secrets integration.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-open-sso-modal">+ Add Provider</button>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table" id="sso-table">
+              <thead>
+                <tr>
+                  <th>Provider Name</th>
+                  <th>Protocol</th>
+                  <th>Client ID</th>
+                  <th>Callback URL</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             3. ACCESS POLICIES & HYBRID RBAC/ABAC ENGINE (Figure 8.1)
+             ================================================================ -->
+        <div class="view-panel" id="view-policies">
+          <div class="page-header">
+            <div>
+              <h2>Access Policies (RBAC / ABAC)</h2>
+              <p>Hybrid role-based and attribute-based contextual authorization policy rules.</p>
+            </div>
+          </div>
+
+          <!-- Policy Evaluation Simulator -->
+          <div class="card-panel" style="margin-bottom: 24px;">
+            <div class="panel-title">Runtime ABAC / RBAC Policy Evaluation Simulator</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 14px; align-items: flex-end;">
+              <div>
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 6px;">Subject Role</label>
+                <select class="form-control" id="sim-role">
+                  <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                  <option value="ORG_ADMIN">ORG_ADMIN</option>
+                  <option value="SECURITY_ADMIN">SECURITY_ADMIN</option>
+                  <option value="AUDITOR">AUDITOR</option>
+                  <option value="OPERATOR">OPERATOR</option>
+                  <option value="MEMBER">MEMBER</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 6px;">Target Resource</label>
+                <input type="text" class="form-control" id="sim-resource" value="organizations/current/workspaces">
+              </div>
+
+              <div>
+                <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 6px;">Action</label>
+                <select class="form-control" id="sim-action">
+                  <option value="read">read</option>
+                  <option value="write">write</option>
+                  <option value="delete">delete</option>
+                  <option value="verify">verify</option>
+                </select>
+              </div>
+
+              <div>
+                <button class="btn btn-primary" id="btn-eval-policy">Evaluate Policy</button>
+              </div>
+            </div>
+
+            <div id="policy-eval-result" style="display: none; margin-top: 16px;"></div>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table" id="policies-table">
+              <thead>
+                <tr>
+                  <th>Policy Name</th>
+                  <th>Subject Role</th>
+                  <th>Resource</th>
+                  <th>Action</th>
+                  <th>ABAC Constraints</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             4. AUDIT LEDGER & INTEGRITY VERIFICATION (Figure 9.1 & 9.2)
+             ================================================================ -->
+        <div class="view-panel" id="view-audit">
+          <div class="page-header">
+            <div>
+              <h2>Append-Only Cryptographic Audit Ledger</h2>
+              <p>Tamper-evident logs secured via hourly SHA-256 hash chaining (7-year retention).</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary" id="btn-simulate-tamper">Simulate Tampering</button>
+              <button class="btn btn-secondary" id="btn-restore-ledger">Restore Ledger</button>
+              <button class="btn btn-primary" id="btn-verify-ledger">Verify Ledger Integrity</button>
+            </div>
+          </div>
+
+          <!-- Interactive Cryptographic Verification Terminal -->
+          <div class="terminal-wrapper" id="verification-terminal" style="display: block;">
+            <div class="terminal-header">
+              <div class="terminal-dots">
+                <span class="dot-red"></span>
+                <span class="dot-yellow"></span>
+                <span class="dot-green"></span>
+              </div>
+              <div class="terminal-title">Ledger Verification Console — SHA-256 Hash Chain Integrity</div>
+              <div style="font-size: 11px; color: var(--accent-emerald);">SECURE_HASH_CHAIN: SHA256</div>
+            </div>
+            <div class="terminal-body">
+              <div class="terminal-line success">[INITIALIZED] Cryptographic ledger validation engine ready.</div>
+              <div class="terminal-line">Genesis hash: 0000000000000000000000000000000000000000000000000000000000000000</div>
+              <div class="terminal-line">Click "Verify Ledger Integrity" to validate all historical blocks.</div>
+            </div>
+          </div>
+
+          <!-- Chronological Audit Ledger Table -->
+          <div class="data-table-container">
+            <table class="data-table" id="audit-table">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Actor</th>
+                  <th>Timestamp</th>
+                  <th>Previous Hash</th>
+                  <th>Entry Hash</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             5. SECRETS MANAGER & KEY VAULT (Figure 10.1)
+             ================================================================ -->
+        <div class="view-panel" id="view-vault">
+          <div class="page-header">
+            <div>
+              <h2>Secrets Manager & Key Vault (HashiCorp Vault)</h2>
+              <p>Logical per-tenant path routing and automated NIST SP 800-57 key rotation schedules.</p>
+            </div>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table" id="vault-table">
+              <thead>
+                <tr>
+                  <th>Secret Path</th>
+                  <th>Rotation Cycle</th>
+                  <th>Last Rotation</th>
+                  <th>Next Rotation</th>
+                  <th>Key Strength</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             6. CONFIGURATION & FEATURE FLAGS
+             ================================================================ -->
+        <div class="view-panel" id="view-flags">
+          <div class="page-header">
+            <div>
+              <h2>Centralized Configuration & Feature Flags</h2>
+              <p>Live runtime toggles with instant global and per-tenant kill switches.</p>
+            </div>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table" id="flags-table">
+              <thead>
+                <tr>
+                  <th>Feature Flag Key</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Kill Switch Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+  </div>
+
+  <!-- Add SSO Provider Modal (Figure 8.1 in Proposal) -->
+  <div class="modal-overlay" id="add-sso-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Single Sign-On (SSO) Provider</h3>
+        <button class="close-btn" id="btn-close-sso-modal">&times;</button>
+      </div>
+      <form id="sso-form">
+        <div class="form-group">
+          <label>Provider Name</label>
+          <input type="text" class="form-control" id="sso-name" placeholder="Auth0 Production Identity" required>
+        </div>
+
+        <div class="form-group">
+          <label>Protocol Type</label>
+          <select class="form-control" id="sso-protocol">
+            <option value="OIDC (OAuth 2.0)">OIDC (OAuth 2.0)</option>
+            <option value="SAML 2.0">SAML 2.0</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Client ID / Issuer URL</label>
+          <input type="text" class="form-control" id="sso-client-id" placeholder="auth0_client_prod_43df4a" required>
+        </div>
+
+        <div class="form-group">
+          <label>Callback URL</label>
+          <input type="url" class="form-control" id="sso-callback" value="https://auth.cyart.io/oidc/callback" required>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-sso-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Provider</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
