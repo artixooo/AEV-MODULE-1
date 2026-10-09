@@ -1,8 +1,7 @@
-package middleware
+package middleware 
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -11,66 +10,151 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// JWTAuth validates the Bearer token and enforces required claims
+//JWTAuth validates the access token sent by the client.
+
 func JWTAuth() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			authHeader := c.Request().Header.Get("Authorization")
-			if authHeader == "" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Missing Authorization header")
-			}
 
-			parts := strings.Split(authHeader, " ")
-			if len(parts) != 2 || parts[0] != "Bearer" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid Authorization header format")
-			}
+				// The client must send its JWT using the authorization HTTP  header.
+				authHeader := c.Request().Header.Get("Authorization")
 
-			tokenString := parts[1]
-			secret := os.Getenv("JWT_SECRET_KEY")
-
-			token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-				if token.Method.Alg() != jwt.SigningMethodHS256.Name {
-					return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid signing algorithm, expected HS256")
+				if authHeader == "" {
+					return Unauthorized()
 				}
-				return []byte(secret), nil
-			})
 
-			if err != nil || !token.Valid {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
-			}
+				//Validate bearer token format
 
-			claims, ok := token.Claims.(jwt.MapClaims)
-			if !ok {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token payload structure")
-			}
-
-			requiredClaims := []string{"sub", "tenant_id", "roles", "permissions", "exp", "iat", "iss", "aud"}
-			for _, req := range requiredClaims {
-				if _, exists := claims[req]; !exists {
-					return echo.NewHTTPError(http.StatusUnauthorized, fmt.Sprintf("Missing required claim: %s", req))
+				parts := strings.Fields(authHeader)
+				if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
+					return Unauthorized()
 				}
-			}
 
-			// Explicitly verify iat (Issued At) is not in the future
-			if iat, ok := claims["iat"].(float64); ok {
-				if int64(iat) > time.Now().Unix() {
-					return echo.NewHTTPError(http.StatusUnauthorized, "Token used before issued")
+				secret := os.Getenv("JWT_SECRET_KEY")
+				if secret == "" {
+					return echo.NewHTTPError(500, "JWT signing secret is not configured")
 				}
-			}
 
-			if fmt.Sprint(claims["iss"]) != "identity" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid issuer: expected 'identity'")
-			}
-			if fmt.Sprint(claims["aud"]) != "gateway" {
-				return echo.NewHTTPError(http.StatusUnauthorized, "Invalid audience: expected 'gateway'")
-			}
+				token, err := jwt.Parse(
+					parts[1],
+						func(token *jwt.Token) (interface{}, error) {
+							if token.Method.Alg() != jwt.SigningMethodHS256.Name {
+								return nil, fmt.Errorf("unexpected signing algorithm")
+								}
+								return []byte(secret), nil
+						},
 
-			c.Request().Header.Set("X-User-Id", fmt.Sprint(claims["sub"]))
-			c.Request().Header.Set("X-Tenant-Id", fmt.Sprint(claims["tenant_id"]))
-			c.Request().Header.Set("X-User-Roles", fmt.Sprint(claims["roles"]))
-			c.Request().Header.Set("X-User-Permissions", fmt.Sprint(claims["permissions"]))
+						//Require the token's standard expiration claim.
+						jwt.WithExpirationRequired(),
 
-			return next(c)
+						//Validate the issuer expected from Identity.
+						jwt.WithIssuer("identity"),
+
+						// Validate the audience expected by Gateway.
+						jwt.WithAudience("gateway"),
+				)
+
+					if err != nil || token == nil || !token.Valid {
+						return Unauthorized()
+					}
+
+						claims, ok := token.Claims.(jwt.MapClaims)
+
+						if !ok {
+							return Unauthorized()
+
+						}
+
+						requiredClaims := []string{
+							"sub",
+							"tenant_id",
+							"roles",
+							"permissions",
+							"exp",
+							"iat",
+							"iss",
+							"aud",
+						}
+
+						for _, claimName := range requiredClaims{
+
+							if _, exists := claims[claimName]; !exists {
+								return Unauthorized()
+							}
+						}
+
+
+						if iat, ok := claims["iat"].(float64); ok {
+							if int64(iat) > time.Now().Unix() {
+								return Unauthorized()
+							}
+						}
+
+						//Extract Permissions safely
+
+						permissions := extractPermissions (
+							claims["permissions"],
+
+						)
+
+						if permissions == nil {
+							return Unauthorized()
+						}
+
+						c.Set("user_permissions", permissions)
+
+						// Forward trusted identity context
+
+						c.Request().Header.Set(
+							"X-User-Id",
+							fmt.Sprint(claims["sub"]),
+
+						)
+
+						c.Request().Header.Set(
+							"X-Tenant-Id",
+							fmt.Sprint(claims["tenant_id"]),
+						)
+
+						c.Request().Header.Set(
+							"X-User-Permissions",
+							strings.Join(permissions, ","),
+						)
+						
+						return next(c)
+				}
 		}
 	}
+
+
+// extractPermissions converts the permissions claim into a normalized []string.
+
+func extractPermissions(value interface {}) []string{
+	var permissions []string 
+
+	switch v := value.(type) {
+
+	case []interface{}:
+
+		for _, item := range v {
+			if permission, ok := item.(string); ok {
+				permissions = append(
+					permissions,
+					permission,
+
+				)
+			}
+		}
+
+	case []string:
+
+		permissions  = append(permissions, v...)
+
+	case string: 
+	    if strings.TrimSpace(v) != "" {
+			permissions = []string{v}
+		}
+	}
+
+	return permissions
 }
