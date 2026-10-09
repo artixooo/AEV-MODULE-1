@@ -1,24 +1,25 @@
 /**
  * CYART AEV - Pod Alpha Administration Console Client Logic
- * Module 1: Pod Alpha Foundation Identity Substrate
+ * Master Engineering Spec v1.0 Alignment
  */
 
 document.addEventListener("DOMContentLoaded", () => {
   initNavigation();
   loadDashboardData();
-  loadSSOProviders();
-  loadPolicies();
+  loadOrganizationsHierarchy();
+  loadKafkaEvents();
+  loadSCIMUsers();
+  loadRoleHierarchy();
   loadAuditLedger();
   loadVaultSecrets();
   loadFeatureFlags();
   setupEventListeners();
 
-  // Periodic telemetry refresh
   setInterval(loadDashboardData, 15000);
 });
 
 // --------------------------------------------------------------------------
-// Navigation & Views
+// Navigation
 // --------------------------------------------------------------------------
 function initNavigation() {
   const navItems = document.querySelectorAll(".nav-item");
@@ -37,9 +38,10 @@ function initNavigation() {
         targetPanel.classList.add("active");
       }
 
-      // Refresh specific view data on navigate
-      if (targetView === "view-sso") loadSSOProviders();
-      if (targetView === "view-policies") loadPolicies();
+      if (targetView === "view-orgs") loadOrganizationsHierarchy();
+      if (targetView === "view-events") loadKafkaEvents();
+      if (targetView === "view-scim") loadSCIMUsers();
+      if (targetView === "view-roles") loadRoleHierarchy();
       if (targetView === "view-audit") loadAuditLedger();
       if (targetView === "view-vault") loadVaultSecrets();
       if (targetView === "view-flags") loadFeatureFlags();
@@ -48,7 +50,7 @@ function initNavigation() {
 }
 
 // --------------------------------------------------------------------------
-// 1. Dashboard & Telemetry (Figure 7.1)
+// 1. Dashboard Overview
 // --------------------------------------------------------------------------
 async function loadDashboardData() {
   try {
@@ -57,11 +59,10 @@ async function loadDashboardData() {
     const data = await res.json();
 
     document.getElementById("stat-tenants").textContent = data.active_tenants;
-    document.getElementById("stat-identities").textContent = data.system_identities.toLocaleString();
+    document.getElementById("stat-workspaces").textContent = data.total_workspaces;
     document.getElementById("stat-rps").textContent = data.gateway_load_rps.toLocaleString();
-    document.getElementById("stat-secrets").textContent = data.vault_secrets;
+    document.getElementById("stat-projects").textContent = data.total_projects;
 
-    // Render microservices
     const serviceContainer = document.getElementById("microservices-list");
     serviceContainer.innerHTML = data.microservices
       .map(
@@ -80,7 +81,6 @@ async function loadDashboardData() {
       )
       .join("");
 
-    // Render alerts
     const alertsContainer = document.getElementById("alerts-list");
     alertsContainer.innerHTML = data.alerts
       .map(
@@ -98,101 +98,206 @@ async function loadDashboardData() {
 }
 
 // --------------------------------------------------------------------------
-// 2. Enterprise Identity Providers (SSO) (Figure 7.2 & 8.1)
+// 2. Multi-Tenant Hierarchy (Orgs -> Workspaces -> Projects)
 // --------------------------------------------------------------------------
-async function loadSSOProviders() {
+async function loadOrganizationsHierarchy() {
   try {
-    const res = await fetch("/api/v1/auth/sso/providers");
+    const res = await fetch("/api/v1/organizations");
     if (!res.ok) return;
     const data = await res.json();
 
-    const tbody = document.querySelector("#sso-table tbody");
-    tbody.innerHTML = data.providers
+    const container = document.getElementById("orgs-hierarchy-container");
+    const orgSelect = document.getElementById("ws-org-select");
+
+    if (orgSelect) {
+      orgSelect.innerHTML = data.organizations
+        .map((o) => `<option value="${o.org_id}">${o.name} (${o.region})</option>`)
+        .join("");
+    }
+
+    container.innerHTML = data.organizations
       .map(
-        (p) => `
+        (org) => `
+      <div class="card-panel" style="margin-bottom: 20px;">
+        <div class="panel-title">
+          <div>
+            <span style="font-size: 16px; font-weight: 700; color: #fff;">${org.name}</span>
+            <span class="badge-tag" style="margin-left: 8px;">Region: ${org.region}</span>
+            <span class="badge-tag" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">${org.plan.toUpperCase()}</span>
+          </div>
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">${org.org_id}</span>
+        </div>
+
+        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 12px;">
+          ${org.workspaces
+            .map(
+              (ws) => `
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="font-weight: 600; color: var(--accent-cyan); font-size: 14px;">
+                  &bull; Workspace: ${ws.name}
+                  <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">(${ws.slug})</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="promptAddProject('${ws.workspace_id}')">+ Add Project</button>
+              </div>
+
+              <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                ${
+                  ws.projects.length > 0
+                    ? ws.projects
+                        .map(
+                          (p) => `
+                    <span style="font-family: var(--font-mono); font-size: 11px; background: rgba(0, 240, 255, 0.06); border: 1px solid rgba(0, 240, 255, 0.2); padding: 4px 10px; border-radius: 4px; color: #fff;">
+                      Project: ${p.name}
+                    </span>
+                  `
+                        )
+                        .join("")
+                    : '<span style="font-size: 12px; color: var(--text-dim);">No projects yet in this workspace.</span>'
+                }
+              </div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+    `
+      )
+      .join("");
+  } catch (err) {
+    console.error("Failed to load organizations hierarchy:", err);
+  }
+}
+
+async function promptAddProject(workspaceId) {
+  const name = prompt("Enter project name:");
+  if (!name) return;
+  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+
+  try {
+    const res = await fetch(`/api/v1/workspaces/${workspaceId}/projects`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, slug }),
+    });
+    if (res.ok) {
+      loadOrganizationsHierarchy();
+      loadDashboardData();
+      loadKafkaEvents();
+      loadAuditLedger();
+    }
+  } catch (err) {
+    alert("Project creation failed: " + err);
+  }
+}
+
+// --------------------------------------------------------------------------
+// 3. Kafka Event Architecture Stream (Section 8.3)
+// --------------------------------------------------------------------------
+async function loadKafkaEvents() {
+  try {
+    const res = await fetch("/api/v1/events");
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const tbody = document.querySelector("#events-table tbody");
+    tbody.innerHTML = data.events
+      .map(
+        (e) => `
       <tr>
-        <td style="font-weight: 600;">${p.name}</td>
-        <td><span class="badge-tag">${p.protocol}</span></td>
-        <td style="font-family: var(--font-mono); font-size: 11px;">${p.client_id}</td>
-        <td style="color: var(--text-muted); font-size: 12px;">${p.callback_url}</td>
-        <td><span class="badge-status ${p.status.toLowerCase()}">${p.status}</span></td>
-        <td>
-          <button class="btn btn-secondary btn-sm" onclick="testSSOConnection('${p.id}')">Test</button>
+        <td><span class="badge-tag" style="background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">${e.event_type}</span></td>
+        <td style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${e.correlation_id}</td>
+        <td style="font-size: 12px; font-weight: 500;">${e.actor ? e.actor.name : "system"}</td>
+        <td style="font-size: 12px; color: var(--accent-cyan); font-family: var(--font-mono);">${e.source}</td>
+        <td style="font-size: 12px; color: var(--text-dim);">${e.timestamp}</td>
+        <td style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          ${JSON.stringify(e.data)}
         </td>
       </tr>
     `
       )
       .join("");
   } catch (err) {
-    console.error("Failed to load SSO providers:", err);
+    console.error("Failed to load events:", err);
   }
 }
 
-function testSSOConnection(id) {
-  alert(`SSO Provider [${id}] handshake validated: OIDC/SAML Discovery document fetched successfully.`);
-}
-
 // --------------------------------------------------------------------------
-// 3. Access Policies & Rule Engine (Figure 8.1)
+// 4. SCIM 2.0 & Identity Management (Section 6.2)
 // --------------------------------------------------------------------------
-async function loadPolicies() {
+async function loadSCIMUsers() {
   try {
-    const res = await fetch("/api/v1/policies");
+    const res = await fetch("/api/v1/scim/v2/Users");
     if (!res.ok) return;
     const data = await res.json();
 
-    const tbody = document.querySelector("#policies-table tbody");
-    tbody.innerHTML = data.policies
-      .map(
-        (p) => `
+    const tbody = document.querySelector("#scim-table tbody");
+    tbody.innerHTML = data.Resources.map(
+      (u) => `
       <tr>
-        <td style="font-weight: 600;">${p.name}</td>
-        <td><span class="badge-tag" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border-color: rgba(99, 102, 241, 0.3);">${p.role}</span></td>
-        <td style="font-family: var(--font-mono); font-size: 11px;">${p.resource}</td>
-        <td style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-emerald);">${p.action}</td>
-        <td style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">${p.constraints}</td>
-        <td><span class="badge-status ${p.status.toLowerCase()}">${p.status}</span></td>
+        <td style="font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--accent-cyan);">${u.userName}</td>
+        <td>${u.name ? u.name.formatted : u.userName}</td>
+        <td style="font-size: 12px; color: var(--text-muted);">${u.emails && u.emails[0] ? u.emails[0].value : ""}</td>
+        <td><span class="badge-tag">${u.roles && u.roles[0] ? u.roles[0].value : "Member"}</span></td>
+        <td><span class="badge-status ${u.active ? "active" : "corrupted"}">${u.active ? "Active" : "Deactivated"}</span></td>
+        <td style="font-size: 12px; color: var(--text-dim);">${u.meta ? u.meta.created.split("T")[0] : ""}</td>
+      </tr>
+    `
+    ).join("");
+  } catch (err) {
+    console.error("Failed to load SCIM users:", err);
+  }
+}
+
+async function triggerMfaEnroll() {
+  try {
+    const res = await fetch("/api/v1/auth/mfa/enroll", { method: "POST" });
+    const data = await res.json();
+    const box = document.getElementById("mfa-enrollment-box");
+    const content = document.getElementById("mfa-enrollment-content");
+    box.style.display = "block";
+    content.innerHTML = `
+      <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.2); padding: 16px; border-radius: var(--radius-sm);">
+        <p><strong>TOTP Secret Key:</strong> <code style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 14px;">${data.secret}</code></p>
+        <p style="margin-top: 8px;"><strong>OTPAUTH URI:</strong> <code style="font-family: var(--font-mono); font-size: 11px; word-break: break-all;">${data.otpauth_uri}</code></p>
+        <p style="margin-top: 8px; color: var(--accent-emerald);">Algorithm: ${data.algorithm} | 6-Digits | 30s Window. Compatible with Google Authenticator & 1Password.</p>
+      </div>
+    `;
+  } catch (err) {
+    alert("MFA enrollment failed: " + err);
+  }
+}
+
+// --------------------------------------------------------------------------
+// 5. Platform Role Hierarchy (Figure 2.1)
+// --------------------------------------------------------------------------
+async function loadRoleHierarchy() {
+  try {
+    const res = await fetch("/api/v1/roles");
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const tbody = document.querySelector("#roles-table tbody");
+    tbody.innerHTML = data.roles
+      .map(
+        (r) => `
+      <tr>
+        <td style="font-weight: 700; color: #fff;">${r.name}</td>
+        <td><span class="badge-tag" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border-color: rgba(99, 102, 241, 0.3);">${r.level} Level</span></td>
+        <td style="font-size: 12px; color: var(--text-muted);">${r.description}</td>
+        <td><span class="badge-status ${r.is_system ? "synced" : "draft"}">${r.is_system ? "System Frozen" : "Custom"}</span></td>
       </tr>
     `
       )
       .join("");
   } catch (err) {
-    console.error("Failed to load policies:", err);
-  }
-}
-
-async function simulatePolicyEval() {
-  const role = document.getElementById("sim-role").value;
-  const resource = document.getElementById("sim-resource").value;
-  const action = document.getElementById("sim-action").value;
-
-  try {
-    const res = await fetch("/api/v1/policies/evaluate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role, resource, action }),
-    });
-    const result = await res.json();
-    const resultEl = document.getElementById("policy-eval-result");
-    resultEl.style.display = "block";
-    resultEl.className = result.decision === "ALLOW" ? "alert-item" : "alert-item alert-danger";
-    resultEl.style.borderLeftColor = result.decision === "ALLOW" ? "var(--accent-emerald)" : "var(--accent-rose)";
-    resultEl.innerHTML = `
-      <div style="font-weight: 700; color: ${result.decision === "ALLOW" ? "var(--accent-emerald)" : "var(--accent-rose)"};">
-        DECISION: ${result.decision}
-      </div>
-      <div style="font-size: 12px; margin-top: 4px; color: var(--text-muted);">
-        Matched Rule: ${result.matched_rule || "Default Deny"} | Evaluation Latency: ${result.evaluation_latency_ms}ms
-      </div>
-    `;
-    loadAuditLedger();
-  } catch (err) {
-    console.error("Simulation failed:", err);
+    console.error("Failed to load roles:", err);
   }
 }
 
 // --------------------------------------------------------------------------
-// 4. Audit Ledger & Integrity Verification Console (Figures 9.1 & 9.2)
+// 6. Cryptographic Audit Ledger & SHA-256 Verification (Section 7.6)
 // --------------------------------------------------------------------------
 async function loadAuditLedger() {
   try {
@@ -205,11 +310,12 @@ async function loadAuditLedger() {
       .map(
         (b) => `
       <tr>
+        <td style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">${b.audit_id.slice(0, 18)}...</td>
         <td style="font-weight: 600;">${b.action}</td>
-        <td style="color: var(--text-main);">${b.actor}</td>
-        <td style="font-size: 12px; color: var(--text-dim);">${b.timestamp}</td>
-        <td class="hash-cell">${b.previous_hash.slice(0, 8)}...${b.previous_hash.slice(-6)}</td>
-        <td class="hash-cell">${b.entry_hash.slice(0, 8)}...${b.entry_hash.slice(-6)}</td>
+        <td style="color: var(--text-main); font-size: 12px;">${b.actor_name}</td>
+        <td><span class="badge-tag">${b.resource_type}</span></td>
+        <td class="hash-cell">${b.previous_hash.slice(0, 10)}...${b.previous_hash.slice(-8)}</td>
+        <td class="hash-cell">${b.entry_hash.slice(0, 10)}...${b.entry_hash.slice(-8)}</td>
         <td><span class="badge-status ${b.status.toLowerCase()}">${b.status}</span></td>
       </tr>
     `
@@ -224,7 +330,7 @@ async function runLedgerVerification() {
   const terminal = document.getElementById("verification-terminal");
   const body = terminal.querySelector(".terminal-body");
   terminal.style.display = "block";
-  body.innerHTML = '<div class="terminal-line">Executing cryptographic hash verification pass...</div>';
+  body.innerHTML = '<div class="terminal-line">Executing cryptographic SHA-256 validation pass...</div>';
 
   try {
     const res = await fetch("/api/v1/audit/verify", { method: "POST" });
@@ -246,7 +352,7 @@ async function runLedgerVerification() {
       } else {
         clearInterval(interval);
       }
-    }, 180);
+    }, 150);
   } catch (err) {
     body.innerHTML = `<div class="terminal-line error">Verification request failed: ${err}</div>`;
   }
@@ -277,7 +383,7 @@ async function restoreLedger() {
 }
 
 // --------------------------------------------------------------------------
-// 5. Secrets Manager & Key Vault (Figure 10.1)
+// 7. Key Vault (HashiCorp Vault & NIST SP 800-57)
 // --------------------------------------------------------------------------
 async function loadVaultSecrets() {
   try {
@@ -315,13 +421,15 @@ async function rotateKey(path) {
     alert(data.message);
     loadVaultSecrets();
     loadDashboardData();
+    loadKafkaEvents();
+    loadAuditLedger();
   } catch (err) {
     alert("Key rotation failed: " + err);
   }
 }
 
 // --------------------------------------------------------------------------
-// 6. Feature Flags
+// 8. Feature Flags (Kill Switches)
 // --------------------------------------------------------------------------
 async function loadFeatureFlags() {
   try {
@@ -356,54 +464,132 @@ async function toggleFlag(key) {
     const res = await fetch(`/api/v1/configuration/flags/toggle?key=${encodeURIComponent(key)}`, { method: "POST" });
     const data = await res.json();
     loadFeatureFlags();
+    loadKafkaEvents();
+    loadAuditLedger();
   } catch (err) {
     alert("Flag toggle failed: " + err);
   }
 }
 
 // --------------------------------------------------------------------------
-// Modal & Global Listeners
+// Modals & Event Listeners
 // --------------------------------------------------------------------------
 function setupEventListeners() {
-  const modal = document.getElementById("add-sso-modal");
-  const openBtn = document.getElementById("btn-open-sso-modal");
-  const closeBtn = document.getElementById("btn-close-sso-modal");
-  const cancelBtn = document.getElementById("btn-cancel-sso-modal");
-  const form = document.getElementById("sso-form");
+  // Workspace Modal
+  const wsModal = document.getElementById("ws-modal");
+  const openWsBtn = document.getElementById("btn-open-ws-modal");
+  const closeWsBtn = document.getElementById("btn-close-ws-modal");
+  const cancelWsBtn = document.getElementById("btn-cancel-ws-modal");
+  const wsForm = document.getElementById("ws-form");
 
-  if (openBtn) openBtn.addEventListener("click", () => modal.classList.add("active"));
-  if (closeBtn) closeBtn.addEventListener("click", () => modal.classList.remove("active"));
-  if (cancelBtn) cancelBtn.addEventListener("click", () => modal.classList.remove("active"));
+  if (openWsBtn) openWsBtn.addEventListener("click", () => wsModal.classList.add("active"));
+  if (closeWsBtn) closeWsBtn.addEventListener("click", () => wsModal.classList.remove("active"));
+  if (cancelWsBtn) cancelWsBtn.addEventListener("click", () => wsModal.classList.remove("active"));
 
-  if (form) {
-    form.addEventListener("submit", async (e) => {
+  if (wsForm) {
+    wsForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const orgId = document.getElementById("ws-org-select").value;
+      const name = document.getElementById("ws-name").value;
+      const slug = document.getElementById("ws-slug").value;
+
+      try {
+        const res = await fetch(`/api/v1/organizations/${orgId}/workspaces`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, slug }),
+        });
+        if (res.ok) {
+          wsModal.classList.remove("active");
+          wsForm.reset();
+          loadOrganizationsHierarchy();
+          loadDashboardData();
+          loadKafkaEvents();
+          loadAuditLedger();
+        }
+      } catch (err) {
+        alert("Failed to create workspace: " + err);
+      }
+    });
+  }
+
+  // Kafka Event Modal
+  const evModal = document.getElementById("event-modal");
+  const openEvBtn = document.getElementById("btn-open-event-modal");
+  const closeEvBtn = document.getElementById("btn-close-event-modal");
+  const cancelEvBtn = document.getElementById("btn-cancel-event-modal");
+  const evForm = document.getElementById("event-form");
+
+  if (openEvBtn) openEvBtn.addEventListener("click", () => evModal.classList.add("active"));
+  if (closeEvBtn) closeEvBtn.addEventListener("click", () => evModal.classList.remove("active"));
+  if (cancelEvBtn) cancelEvBtn.addEventListener("click", () => evModal.classList.remove("active"));
+
+  if (evForm) {
+    evForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const event_type = document.getElementById("event-type-select").value;
+      const actor_email = document.getElementById("event-actor").value;
+      const resource_name = document.getElementById("event-resource").value;
+
+      try {
+        const res = await fetch("/api/v1/events/publish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ event_type, actor_email, resource_name }),
+        });
+        if (res.ok) {
+          evModal.classList.remove("active");
+          evForm.reset();
+          loadKafkaEvents();
+          loadAuditLedger();
+        }
+      } catch (err) {
+        alert("Failed to publish event: " + err);
+      }
+    });
+  }
+
+  // SCIM Modal
+  const scimModal = document.getElementById("scim-modal");
+  const openScimBtn = document.getElementById("btn-open-scim-modal");
+  const closeScimBtn = document.getElementById("btn-close-scim-modal");
+  const cancelScimBtn = document.getElementById("btn-cancel-scim-modal");
+  const scimForm = document.getElementById("scim-form");
+
+  if (openScimBtn) openScimBtn.addEventListener("click", () => scimModal.classList.add("active"));
+  if (closeScimBtn) closeScimBtn.addEventListener("click", () => scimModal.classList.remove("active"));
+  if (cancelScimBtn) cancelScimBtn.addEventListener("click", () => scimModal.classList.remove("active"));
+
+  if (scimForm) {
+    scimForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const payload = {
-        name: document.getElementById("sso-name").value,
-        protocol: document.getElementById("sso-protocol").value,
-        client_id: document.getElementById("sso-client-id").value,
-        callback_url: document.getElementById("sso-callback").value,
+        userName: document.getElementById("scim-username").value,
+        givenName: document.getElementById("scim-given").value,
+        familyName: document.getElementById("scim-family").value,
+        role: document.getElementById("scim-role").value,
       };
 
       try {
-        const res = await fetch("/api/v1/auth/sso/providers", {
+        const res = await fetch("/api/v1/scim/v2/Users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
         if (res.ok) {
-          modal.classList.remove("active");
-          form.reset();
-          loadSSOProviders();
-          loadDashboardData();
+          scimModal.classList.remove("active");
+          scimForm.reset();
+          loadSCIMUsers();
+          loadKafkaEvents();
+          loadAuditLedger();
         }
       } catch (err) {
-        alert("Failed to add provider: " + err);
+        alert("Failed to provision user: " + err);
       }
     });
   }
 
-  // Verification button
+  // Audit Buttons
   const verifyBtn = document.getElementById("btn-verify-ledger");
   if (verifyBtn) verifyBtn.addEventListener("click", runLedgerVerification);
 
@@ -412,8 +598,4 @@ function setupEventListeners() {
 
   const restoreBtn = document.getElementById("btn-restore-ledger");
   if (restoreBtn) restoreBtn.addEventListener("click", restoreLedger);
-
-  // Policy simulator
-  const simBtn = document.getElementById("btn-eval-policy");
-  if (simBtn) simBtn.addEventListener("click", simulatePolicyEval);
 }
