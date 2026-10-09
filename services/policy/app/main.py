@@ -2,8 +2,8 @@
 Policy Service Main Application Entrypoint.
 
 Squad 4 - Pod Alpha (Foundation & Identity)
-Squad Lead: Utkarsh Pratham
-Squad Member: Narayanan Varadarajan
+Pod Alpha Security Engineering
+Squad Member: Pod Alpha Security Engineering
 
 Scope: project setup, config, DB models mirroring the migration-defined
 schema, health/readiness endpoints, infra readiness (config loading,

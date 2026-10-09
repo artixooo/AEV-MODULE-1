@@ -10,7 +10,7 @@ Evaluates:
 3. Scope Hierarchy: Enforces scope boundaries (org -> workspace -> project).
 4. Pure RBAC: role -> role_permissions -> permission evaluation.
 
-Author: Utkarsh Pratham (Squad Lead), Narayanan Varadarajan & Pratik
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

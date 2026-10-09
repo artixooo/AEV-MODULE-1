@@ -2,7 +2,7 @@
 Auth Middleware Security Tests — verifies JWT algorithm restriction and
 rejection of expired/malformed tokens, per issue #61 review point 3.
 
-Author: Utkarsh Pratham (Squad Lead) & Narayanan Varadarajan
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

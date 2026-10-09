@@ -197,11 +197,11 @@ Squad 6
 
 Lead
 
-- Bhumika Ghimire
+- Pod Alpha Security Engineering
 
 Members
 
-- Sumedha Shree
+- Pod Alpha Security Engineering
 
 ---
 

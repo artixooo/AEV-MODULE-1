@@ -927,13 +927,13 @@ feature/<service>-<developer>
 
 Examples:
 
-feature/identity-farhan
-feature/secrets-kushalram
-feature/policy-aditya
-feature/audit-rohit
-feature/gateway-harshit
-feature/config-bhukailash
-Creating a Week 2 Feature Branch
+feature/identity-auth
+feature/secrets-vault
+feature/policy-engine
+feature/audit-ledger
+feature/gateway-routing
+feature/config-flags
+Creating a Feature Branch
 
 Start from the latest develop:
 
@@ -942,15 +942,15 @@ git pull origin develop
 
 Create the feature branch:
 
-git checkout -b feature/<service>-<name>
+git checkout -b feature/<service>-<feature>
 
 Example:
 
-git checkout -b feature/identity-farhan
+git checkout -b feature/identity-auth
 
 Push the branch:
 
-git push -u origin feature/identity-farhan
+git push -u origin feature/identity-auth
 Keeping a Feature Branch Updated
 
 Before starting work:

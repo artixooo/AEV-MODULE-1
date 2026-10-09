@@ -6,6 +6,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   initNavigation();
   loadDashboardData();
+  loadSquadsArchitecture();
   loadOrganizationsHierarchy();
   loadKafkaEvents();
   loadSCIMUsers();
@@ -38,6 +39,7 @@ function initNavigation() {
         targetPanel.classList.add("active");
       }
 
+      if (targetView === "view-squads") loadSquadsArchitecture();
       if (targetView === "view-orgs") loadOrganizationsHierarchy();
       if (targetView === "view-events") loadKafkaEvents();
       if (targetView === "view-scim") loadSCIMUsers();
@@ -94,6 +96,34 @@ async function loadDashboardData() {
       .join("");
   } catch (err) {
     console.error("Failed to load telemetry:", err);
+  }
+}
+
+// --------------------------------------------------------------------------
+// Squads Architecture (No personal names)
+// --------------------------------------------------------------------------
+async function loadSquadsArchitecture() {
+  try {
+    const res = await fetch("/api/v1/squads");
+    if (!res.ok) return;
+    const data = await res.json();
+    const tbody = document.getElementById("squads-table-body");
+    if (!tbody) return;
+
+    tbody.innerHTML = data.squads
+      .map(
+        (s) => `
+      <tr>
+        <td><strong><span class="badge-tag">${s.squad}</span></strong></td>
+        <td style="font-weight: 600; color: var(--primary);">${s.service}</td>
+        <td><code style="background: var(--bg-card-subtle); padding: 3px 6px; border-radius: 4px; font-size: 12px; border: 1px solid var(--border-color);">${s.tech}</code></td>
+        <td style="color: var(--text-main); font-size: 13px; line-height: 1.5;">${s.responsibilities}</td>
+      </tr>
+    `
+      )
+      .join("");
+  } catch (err) {
+    console.error("Failed to load squads architecture:", err);
   }
 }
 

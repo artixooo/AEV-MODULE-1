@@ -6,7 +6,7 @@ permissions, and role-permission mappings, confirm evaluate_permission()
 returns the correct ALLOW/DENY decision for every case, including both
 "not found" edge cases. Runs entirely against in-memory SQLite.
 
-Author: Utkarsh Pratham (Squad Lead) & Narayanan Varadarajan
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

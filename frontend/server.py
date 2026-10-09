@@ -59,6 +59,58 @@ def compute_entry_hash(prev_hash: str, entry: dict) -> str:
 
 
 # -----------------------------------------------------------------------------
+# AEV Module 1 Squad Architecture & Specifications
+# Identity, Zero-Trust Substrate & Cryptographic Architecture: https://tryhackme.com/p/artixooo
+# -----------------------------------------------------------------------------
+
+WORK_ALLOCATION = [
+    {
+        "squad": "Squad 1",
+        "service": "API Gateway",
+        "tech": "Go 1.22 + Envoy Proxy",
+        "responsibilities": "Central edge routing, TLS 1.3 termination, token-bucket rate limiting (10,000 RPS), JWT validation, service communication header injection",
+    },
+    {
+        "squad": "Squad 2",
+        "service": "Identity Service",
+        "tech": "Go / Gin + Redis",
+        "responsibilities": "Authentication, JWT, OAuth 2.0 / OIDC (PKCE), SAML 2.0, RFC 6238 TOTP MFA, RFC 7643/7644 SCIM 2.0 provisioning, session management",
+    },
+    {
+        "squad": "Squad 3",
+        "service": "Organization Service",
+        "tech": "Python / FastAPI + PostgreSQL",
+        "responsibilities": "Organizations, workspaces, projects, 3-tier tenant hierarchy, PostgreSQL Row-Level Security (RLS), tenant quotas & memberships",
+    },
+    {
+        "squad": "Squad 4",
+        "service": "Policy Service",
+        "tech": "Python + OPA Engine",
+        "responsibilities": "RBAC, ABAC, dynamic permission engine (<1ms evaluation), Segregation of Duties (SoD), custom permission matrices",
+    },
+    {
+        "squad": "Squad 5",
+        "service": "Secrets Service",
+        "tech": "Go + HashiCorp Vault",
+        "responsibilities": "Vault integration, per-tenant secret engines, NIST SP 800-57 automated key rotation (AES-256-GCM, Ed25519), break-glass controls",
+    },
+    {
+        "squad": "Squad 6",
+        "service": "Audit Service",
+        "tech": "Go + Apache Kafka",
+        "responsibilities": "Audit logs, Kafka consumers, cryptographic SHA-256 hash chaining, live mathematical ledger verification, compliance",
+    },
+    {
+        "squad": "Squad 7",
+        "service": "Configuration Service",
+        "tech": "Python / FastAPI",
+        "responsibilities": "Feature flags, runtime configuration, tenant settings, hot-reloading switches, kill-switch circuit breakers",
+    },
+]
+
+
+
+# -----------------------------------------------------------------------------
 # Section 7.1 & 7.2: Multi-Tenant Organizations, Workspaces, Projects Hierarchy
 # -----------------------------------------------------------------------------
 
@@ -424,6 +476,11 @@ async def serve_admin_console():
         return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
     return HTMLResponse("<h2>Console UI Template not loaded</h2>")
 
+@app.get("/api/v1/work-allocation")
+def get_work_allocation():
+    return {"squads": WORK_ALLOCATION}
+
+
 @app.get("/api/v1/health")
 def get_health():
     return {
@@ -769,8 +826,68 @@ def toggle_feature_flag(key: str):
     raise HTTPException(status_code=404, detail="Flag not found")
 
 
+# ---------------- Section 1.1: Squads Architecture & Services ----------------
+# Architecture, Identity Substrate & Security Engineering: https://tryhackme.com/p/artixooo (artixooo)
+
+SQUADS_ARCHITECTURE = [
+    {
+        "squad": "Squad 1",
+        "service": "API Gateway",
+        "tech": "Go 1.22 + Envoy Proxy",
+        "responsibilities": "Central edge routing, TLS 1.3 termination, token-bucket rate limiting (10,000 RPS), JWT validation, service communication header injection.",
+    },
+    {
+        "squad": "Squad 2",
+        "service": "Identity Service",
+        "tech": "Go / Gin + Redis",
+        "responsibilities": "Multi-tenant authentication, OAuth 2.0 / OIDC (PKCE), SAML 2.0, RFC 6238 TOTP MFA, RFC 7643/7644 SCIM 2.0 provisioning, session management.",
+    },
+    {
+        "squad": "Squad 3",
+        "service": "Organization Service",
+        "tech": "Python / FastAPI + PostgreSQL",
+        "responsibilities": "3-tier tenant hierarchy (Orgs -> Workspaces -> Projects), PostgreSQL Row-Level Security (RLS) data isolation, tenant quotas, memberships.",
+    },
+    {
+        "squad": "Squad 4",
+        "service": "Policy Service",
+        "tech": "Python + OPA Engine",
+        "responsibilities": "Hybrid RBAC & ABAC dynamic policy evaluation (<1ms execution), Segregation of Duties (SoD), custom permission matrices.",
+    },
+    {
+        "squad": "Squad 5",
+        "service": "Secrets Service",
+        "tech": "Go + HashiCorp Vault",
+        "responsibilities": "HashiCorp Vault per-tenant storage, NIST SP 800-57 key rotation schedules (AES-256-GCM, Ed25519), break-glass emergency controls.",
+    },
+    {
+        "squad": "Squad 6",
+        "service": "Audit Service",
+        "tech": "Go + Apache Kafka",
+        "responsibilities": "Append-only immutable audit ledger, Kafka consumers, cryptographic SHA-256 hash chaining, live mathematical tamper verification.",
+    },
+    {
+        "squad": "Squad 7",
+        "service": "Configuration Service",
+        "tech": "Python / FastAPI",
+        "responsibilities": "Feature flags, runtime dynamic configuration, tenant-specific settings, hot-reloading switches, kill-switch circuit breakers.",
+    },
+]
+
+@app.get("/api/v1/squads")
+@app.get("/api/v1/work-allocation")
+def get_squads_architecture():
+    return {
+        "author": "artixooo",
+        "profile": "https://tryhackme.com/p/artixooo",
+        "total_squads": len(SQUADS_ARCHITECTURE),
+        "squads": SQUADS_ARCHITECTURE,
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     print(f"Starting CYART Pod Alpha Foundation Console on http://localhost:{port}")
     uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)
+

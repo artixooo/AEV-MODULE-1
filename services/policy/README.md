@@ -2,7 +2,7 @@
 
 ## Authorization Service — Tenant & Scope-Aware RBAC Foundation (Week 4)
 
-**Squad Lead:** Utkarsh Pratham | **Squad Members:** Narayanan Varadarajan & Pratik | **Port:** 8002
+Pod Alpha Security Engineering
 
 ---
 
@@ -263,5 +263,5 @@ For detailed architectural flows, token contracts, and RBAC specifications:
 
 Squad 4 — Policy Service | CyArt Tech LLP | AEV Platform (Pod Alpha)
 
-Utkarsh Pratham (Squad Lead) | Narayanan Varadarajan & Pratik (Squad Members)
+Pod Alpha Security Engineering
 Branch: `feature/policy-week4-tenant-context-pratik` | Tenant & Scope Authorization (Issue #93)

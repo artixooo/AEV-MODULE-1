@@ -30,7 +30,7 @@ together in this codebase:
    before on teardown, so we don't interfere with that other file's
    own tests.
 
-Author: Utkarsh Pratham (Squad Lead) & Narayanan Varadarajan
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

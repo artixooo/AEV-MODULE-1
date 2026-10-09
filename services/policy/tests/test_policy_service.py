@@ -1,7 +1,7 @@
 """
 Policy Service Test Suite — Week 1 (Pod Alpha, Squad 4).
 
-Authors: Utkarsh Pratham (Squad Lead) & Narayanan Varadarajan (Squad Member)
+Authors: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform
 
 Week 1 scope: verifies the service boots and the health/readiness

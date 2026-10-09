@@ -15,7 +15,7 @@ either belongs to that exact organization, or is a global/system role
 doesn't exist at all, so callers can't distinguish "wrong org" from
 "no such role".
 
-Author: Utkarsh Pratham (Squad Lead), Narayanan Varadarajan & Pratik
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

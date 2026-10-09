@@ -13,7 +13,7 @@ does not determine *what role* they have. Callers must supply the role
 to check explicitly (e.g. as a request parameter to /evaluate), since no
 service in this system currently maps a user to a role.
 
-Author: Utkarsh Pratham (Squad Lead) & Narayanan Varadarajan
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

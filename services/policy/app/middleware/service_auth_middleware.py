@@ -21,7 +21,7 @@ This is the "restrict this endpoint to internal policy-evaluation
 usage" option from the #61 review, chosen because a real JWT-based
 role mapping isn't buildable until Identity Service adds it.
 
-Author: Utkarsh Pratham (Squad Lead) & Narayanan Varadarajan
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

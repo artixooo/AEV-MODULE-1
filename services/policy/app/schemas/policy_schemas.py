@@ -1,7 +1,7 @@
 """
 Pydantic Schemas — Policy Service API (v1, Tenant-Aware RBAC scope).
 
-Author: Utkarsh Pratham (Squad Lead), Narayanan Varadarajan & Pratik
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

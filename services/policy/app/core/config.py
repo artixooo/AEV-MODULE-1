@@ -4,7 +4,7 @@ Policy Service Configuration Module.
 This module defines the application configuration settings using Pydantic Settings.
 Environment variables are automatically validated and loaded with default fallback values.
 
-Author: Utkarsh Pratham (Squad Leader) & Narayanan Varadarajan
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

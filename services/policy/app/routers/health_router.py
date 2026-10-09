@@ -8,7 +8,7 @@ GET /ready   — Readiness probe. Checks PostgreSQL connectivity.
               Returns 200 when fully ready, 503 when the database is
               unhealthy so the load-balancer can remove the instance.
 
-Author: Utkarsh Pratham (Squad Leader) & Narayanan Varadarajan
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

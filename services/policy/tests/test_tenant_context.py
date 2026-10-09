@@ -12,7 +12,7 @@ Covers:
 8. API endpoint integration with Tenant Headers and JSON payload
 9. Backward compatibility regression tests (legacy flat RBAC calls)
 
-Author: Utkarsh Pratham (Squad Lead), Narayanan Varadarajan & Pratik
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

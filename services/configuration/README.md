@@ -51,11 +51,11 @@ Centralized service for managing application configuration, feature flags, and t
 
 **Squad:** Squad 7
 
-**Lead:** Bhukailash Pilli
+**Lead:** Pod Alpha Security Engineering
 
 **Members:**
 
-- Harshit Prajapat
+- Pod Alpha Security Engineering
 
 ---
 

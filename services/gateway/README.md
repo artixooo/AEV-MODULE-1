@@ -7,12 +7,9 @@ The API Gateway is the single entry point for all client requests. It routes req
 
 ---
 
-## Team Ownership
-**Squad:** Squad 1  
-**Lead:** Shubhradeep Paul  
-**Members:**  
-- Rohit Bapu S B  
-- Sulaiba Saania  
+## Squad Ownership
+**Squad:** Squad 1 (API Gateway & Edge Routing)  
+**Security Architecture & Audit:** [artixooo](https://tryhackme.com/p/artixooo)  
 
 ---
 

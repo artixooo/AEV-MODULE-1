@@ -5,7 +5,7 @@ All endpoints require a valid Bearer token (see app/middleware/auth_middleware.p
 POST /evaluate is an internal service-to-service endpoint requiring both an
 authenticated user JWT and the shared internal service credential.
 
-Author: Utkarsh Pratham (Squad Lead), Narayanan Varadarajan & Pratik
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

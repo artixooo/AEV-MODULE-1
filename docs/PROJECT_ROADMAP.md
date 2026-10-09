@@ -344,8 +344,8 @@ Production Deployment ⏳
 
 ---
 
-# Repository Owner
+# Engineering & Substrate Verification
 
-Project Lead: **Farhan Bahadure**
+Platform Engineering & Security Substrate: **[artixooo](https://tryhackme.com/p/artixooo)**
 
-Project: **AEV Module 1 – Pod Alpha**
+Project: **AEV Module 1 – Pod Alpha (Foundation & Identity Substrate)**

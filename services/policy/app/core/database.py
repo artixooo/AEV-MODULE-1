@@ -4,7 +4,7 @@ Policy Service Database Infrastructure Module.
 Provides SQLAlchemy database engine initialization, ORM session factory management,
 and dependency injection helpers for database connections.
 
-Author: Utkarsh Pratham (Squad Leader) & Narayanan Varadarajan
+Author: Pod Alpha Security Engineering
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 

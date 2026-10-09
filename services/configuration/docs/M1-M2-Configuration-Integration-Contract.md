@@ -110,5 +110,5 @@ risk scoring on Configuration Service being up.**
 
 | Squad | Representative | Status |
 |---|---|---|
-| Pod Alpha — Configuration Service | Bhukailash Pilli | Drafted |
+| Pod Alpha — Configuration Service | Pod Alpha Security Engineering | Drafted |
 | Pod Beta — Risk Scoring Engine | K. Bharath Veer | Pending review |

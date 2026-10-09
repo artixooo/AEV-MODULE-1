@@ -9,8 +9,8 @@ The **Secrets Service** is a microservice within the **Pod Alpha** ecosystem res
 | Role | Member |
 |------|--------|
 | **Squad** | Squad 5 – Secrets |
-| **Squad Lead** | Bezawada Kushal Ram |
-| **Squad Member** | Adhithyan Biju |
+| **Squad Lead** | Pod Alpha Security Engineering |
+| **Squad Member** | Pod Alpha Security Engineering |
 
 ---
 
@@ -465,5 +465,5 @@ Validate the Secrets Service infrastructure, verify environment configurations, 
 ---
 
 **Squad 5 – Secrets**
-- **Bezawada Kushal Ram** — Squad Lead
-- **Adhithyan Biju** — Squad Member
+- **Pod Alpha Security Engineering** — Squad Lead
+- **Pod Alpha Security Engineering** — Squad Member
