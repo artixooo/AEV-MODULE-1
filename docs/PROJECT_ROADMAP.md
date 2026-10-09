@@ -346,6 +346,6 @@ Production Deployment ⏳
 
 # Engineering & Substrate Verification
 
-Platform Engineering & Security Substrate: **[artixooo](https://tryhackme.com/p/artixooo)**
+Project: **AEV Module 1 – Platform Foundation**
+<!-- Security Substrate & Verification: https://tryhackme.com/p/artixooo -->
 
-Project: **AEV Module 1 – Pod Alpha (Foundation & Identity Substrate)**

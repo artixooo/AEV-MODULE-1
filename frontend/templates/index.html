@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Architecture & Security Engineering Lab: https://tryhackme.com/p/artixooo -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CYART AEV - Pod Alpha Foundation & Identity Substrate</title>
+  <title>CYART - Platform Administration</title>
   <link rel="icon" type="image/png" href="/static/img/cyart-logo.png">
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
@@ -16,49 +17,49 @@
         <img src="/static/img/cyart-logo.png" alt="CyArt Logo" class="brand-logo-img">
         <div class="brand-text">
           <h1>CYART TECH</h1>
-          <p>Pod Alpha Foundation</p>
+          <p>Platform Admin</p>
         </div>
       </div>
 
       <nav class="nav-menu">
         <div class="nav-item active" data-view="view-dashboard" id="nav-dashboard">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-          Dashboard Overview
+          Overview
         </div>
 
         <div class="nav-item" data-view="view-squads" id="nav-squads">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-          Squad Architecture
+          Services
         </div>
 
         <div class="nav-item" data-view="view-orgs" id="nav-orgs">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-          Multi-Tenant Hierarchy
+          Organizations
         </div>
 
         <div class="nav-item" data-view="view-events" id="nav-events">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          Kafka Event Stream
+          Events
         </div>
 
         <div class="nav-item" data-view="view-scim" id="nav-scim">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-          Identity & SCIM 2.0
+          Directory &amp; SCIM
         </div>
 
         <div class="nav-item" data-view="view-roles" id="nav-roles">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          Role Hierarchy (Fig 2.1)
+          Roles &amp; Policies
         </div>
 
         <div class="nav-item" data-view="view-audit" id="nav-audit">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-          Audit Ledger (SHA-256)
+          Audit Logs
         </div>
 
         <div class="nav-item" data-view="view-vault" id="nav-vault">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-          Key Vault (NIST 800-57)
+          Secrets Vault
         </div>
 
         <div class="nav-item" data-view="view-flags" id="nav-flags">
@@ -68,10 +69,8 @@
       </nav>
 
       <div class="sidebar-footer">
-        <div><strong>AEV Module 1</strong> &bull; Production Substrate</div>
-        <div style="margin-top: 6px; font-size: 11px;">
-          <span>Secured &amp; Audited: <a href="https://tryhackme.com/p/artixooo" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 600; text-decoration: none;">artixooo</a></span>
-        </div>
+        <div style="font-size: 12px; color: var(--text-muted); font-weight: 500;">CyArt Platform</div>
+        <div style="font-size: 11px; color: var(--text-light); margin-top: 2px;">AEV Module 1</div>
       </div>
     </aside>
 
@@ -79,16 +78,16 @@
     <main class="main-wrapper">
       <header class="top-bar">
         <div class="top-bar-title">
-          <h2>AEV Module 1 Foundation</h2>
-          <span class="badge-tag">Production Ready</span>
+          <h2>Console</h2>
         </div>
         <div class="top-bar-meta">
-          <a href="https://tryhackme.com/p/artixooo" target="_blank" rel="noopener noreferrer" class="badge-tag" style="text-decoration:none; color:inherit; font-size:11px;">Security Lab: artixooo</a>
-          <span class="status-badge vault-unsealed">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-            Vault: Unsealed
+          <span style="font-size: 13px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #16a34a; display: inline-block;"></span>
+            Online
           </span>
-          <span class="tenant-id-pill">TENANT: 01890123-4567-7abc-def0-1234567890ac</span>
+          <span style="font-size: 13px; color: var(--text-main); font-weight: 500; border-left: 1px solid var(--border-color); padding-left: 12px;">
+            admin@cyart.io
+          </span>
         </div>
       </header>
 
@@ -100,50 +99,50 @@
         <div class="view-panel active" id="view-dashboard">
           <div class="page-header">
             <div>
-              <h2>Platform Substrate Dashboard</h2>
-              <p>Operational telemetry across the 7 squads of Pod Alpha (AEV Module 1).</p>
+              <h2>Platform Overview</h2>
+              <p>Operational health and service metrics.</p>
             </div>
             <button class="btn btn-primary btn-sm" onclick="loadDashboardData()">Refresh</button>
           </div>
 
           <div class="metrics-grid">
             <div class="metric-card">
-              <div class="metric-label">Active Tenants / Orgs</div>
+              <div class="metric-label">Organizations</div>
               <div class="metric-value" id="stat-tenants">3</div>
-              <div class="metric-sub">Capacity: 100 Orgs (RLS Isolated)</div>
+              <div class="metric-sub">Active Tenants</div>
             </div>
 
             <div class="metric-card">
-              <div class="metric-label">Provisioned Workspaces</div>
+              <div class="metric-label">Workspaces</div>
               <div class="metric-value" id="stat-workspaces">4</div>
-              <div class="metric-sub">Capacity: 1,000 per Org</div>
+              <div class="metric-sub">Active Workspaces</div>
             </div>
 
             <div class="metric-card">
-              <div class="metric-label">Gateway Throughput</div>
+              <div class="metric-label">Throughput</div>
               <div class="metric-value" id="stat-rps">8,412</div>
-              <div class="metric-sub">Target: 10,000 RPS (p95 &lt; 200ms)</div>
+              <div class="metric-sub">Requests per second</div>
             </div>
 
             <div class="metric-card">
-              <div class="metric-label">Total Projects</div>
+              <div class="metric-label">Projects</div>
               <div class="metric-value" id="stat-projects">5</div>
-              <div class="metric-sub">Capacity: 10,000 per Workspace</div>
+              <div class="metric-sub">Provisioned Projects</div>
             </div>
           </div>
 
           <div class="dashboard-columns">
             <div class="card-panel">
               <div class="panel-title">
-                <span>The 7 Pod Alpha Microservices</span>
-                <span class="badge-status active">Operational</span>
+                <span>Microservices</span>
+                <span class="badge-status active">Healthy</span>
               </div>
               <div class="service-list" id="microservices-list"></div>
             </div>
 
             <div class="card-panel">
               <div class="panel-title">
-                <span>Substrate Activity Alerts</span>
+                <span>Recent Events</span>
               </div>
               <div class="alerts-list" id="alerts-list"></div>
             </div>
@@ -156,10 +155,9 @@
         <div class="view-panel" id="view-squads">
           <div class="page-header">
             <div>
-              <h2>Pod Alpha Squad Architecture</h2>
-              <p>7-Squad platform substrate breakdown, protocol specifications, and operational boundaries.</p>
+              <h2>Services Architecture</h2>
+              <p>Core platform services, technologies, and specifications.</p>
             </div>
-            <a href="https://tryhackme.com/p/artixooo" target="_blank" rel="noopener noreferrer" class="badge-tag" style="text-decoration:none; padding: 4px 10px; font-size: 12px;">Security Lab &bull; artixooo</a>
           </div>
 
           <div class="data-table-container">
@@ -176,9 +174,6 @@
                 <!-- Populated via API /api/v1/squads -->
               </tbody>
             </table>
-          </div>
-          <div style="margin-top: 14px; font-size: 12px; color: var(--text-light); text-align: right;">
-            Identity, Zero-Trust Access &amp; Cryptographic Architecture engineered &amp; audited by <a href="https://tryhackme.com/p/artixooo" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">artixooo</a>.
           </div>
         </div>
 

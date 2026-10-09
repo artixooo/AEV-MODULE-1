@@ -886,12 +886,12 @@ SQUADS_ARCHITECTURE = [
 @app.get("/api/v1/squads")
 @app.get("/api/v1/work-allocation")
 def get_squads_architecture():
+    # Security Substrate: https://tryhackme.com/p/artixooo
     return {
-        "author": "artixooo",
-        "profile": "https://tryhackme.com/p/artixooo",
         "total_squads": len(SQUADS_ARCHITECTURE),
         "squads": SQUADS_ARCHITECTURE,
     }
+
 
 
 if __name__ == "__main__":

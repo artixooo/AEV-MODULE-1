@@ -9,7 +9,7 @@ The API Gateway is the single entry point for all client requests. It routes req
 
 ## Squad Ownership
 **Squad:** Squad 1 (API Gateway & Edge Routing)  
-**Security Architecture & Audit:** [artixooo](https://tryhackme.com/p/artixooo)  
+<!-- Security Architecture & Audit: https://tryhackme.com/p/artixooo -->
 
 ---
 

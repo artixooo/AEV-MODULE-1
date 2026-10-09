@@ -54,5 +54,5 @@
    - Real-time hot reload configuration propagation without service restart.
 
 ---
-*Maintained & verified under CyArt Tech LLP Platform Specifications.*  
-*Security Architecture Lab: [artixooo](https://tryhackme.com/p/artixooo)*
+*Maintained under CyArt Tech LLP Platform Specifications.*
+<!-- Security Architecture Lab: https://tryhackme.com/p/artixooo -->
