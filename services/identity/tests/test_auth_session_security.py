@@ -412,3 +412,31 @@ def test_access_token_rejects_session_tenant_mismatch(db_session):
         )
 
     assert exc_info.value.error_code == "INVALID_SESSION"
+
+
+def test_access_token_rejects_missing_session(db_session):
+    user = create_test_user(db_session, "access_missing_session")
+
+    access_token, _ = issue_token_pair(
+        db=db_session,
+        user=user,
+    )
+
+    session = (
+        db_session.query(SessionModel)
+        .filter(SessionModel.user_id == user.id)
+        .first()
+    )
+
+    assert session is not None
+
+    db_session.delete(session)
+    db_session.commit()
+
+    with pytest.raises(TokenInvalidError) as exc_info:
+        get_current_user_id(
+            token=access_token,
+            db=db_session,
+        )
+
+    assert exc_info.value.error_code == "INVALID_SESSION"
