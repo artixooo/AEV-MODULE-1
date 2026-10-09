@@ -22,8 +22,9 @@
 <p align="center">
   <b>High-throughput Edge Gateway</b> • <b>PostgreSQL Row-Level Security</b> • <b>SCIM 2.0 Identity Bridge</b> • <b>NIST SP 800-57 Key Lifecycle</b> • <b>Event-Driven Kafka Bus</b>
 </p>
-
-<!-- Architecture, Security Substrate & Engineering: https://tryhackme.com/p/artixooo -->
+<p align="center">
+  <b>Architected & Built by:</b> <a href="https://www.linkedin.com/in/utkarsh-pratham/"><b>Utkarsh Pratham</b></a> (GitHub: <a href="https://github.com/artixooo"><b>@artixooo</b></a>)
+</p>
 
 </div>
 
@@ -301,11 +302,32 @@ AEV-MODULE-1/
 
 ---
 
+## 👨‍💻 Engineering & Authorship
+
+<div align="center">
+
+### **Utkarsh Pratham**
+*Security Architect & Systems Engineer*
+
+[![GitHub: artixooo](https://img.shields.io/badge/GitHub-artixooo-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/artixooo)
+[![LinkedIn: Utkarsh Pratham](https://img.shields.io/badge/LinkedIn-Utkarsh%20Pratham-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/utkarsh-pratham/)
+[![Security Lab: artixooo](https://img.shields.io/badge/Security%20Lab-artixooo-212C42?style=for-the-badge&logo=tryhackme&logoColor=white)](https://tryhackme.com/p/artixooo)
+
+Core architecture, microservice orchestration, zero-trust substrate, and cryptographic audit ledger designed & implemented by **Utkarsh Pratham**.
+
+🔗 **LinkedIn:** [linkedin.com/in/utkarsh-pratham](https://www.linkedin.com/in/utkarsh-pratham/)  
+🐙 **GitHub:** [@artixooo](https://github.com/artixooo)  
+🛡️ **Security Lab:** [tryhackme.com/p/artixooo](https://tryhackme.com/p/artixooo)
+
+</div>
+
+---
+
 ## 📄 License & Attribution
 
 Distributed under the **MIT License**. Maintained under CyArt Tech LLP Platform Specifications.
 
-<!-- Security Substrate & Engineering: https://tryhackme.com/p/artixooo -->
 <div align="center">
-  <sub>Built with precision for enterprise cyber defense & zero-trust platform orchestration.</sub>
+  <sub>Built with precision by <b>Utkarsh Pratham</b> for enterprise cyber defense & zero-trust platform orchestration.</sub>
 </div>
+
