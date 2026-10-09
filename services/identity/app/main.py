@@ -17,6 +17,11 @@ from app.models.oidc_config import OIDCConfig
 from app.routers.auth_router import router as auth_router
 from app.routers.router_logout import router as logout_router
 
+from app.routers.scim import (
+    groups_router as scim_groups_router,
+    users_router as scim_users_router,
+)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -57,12 +62,6 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
-
-
-app.include_router(auth_router)
-app.include_router(oauth_router)
-app.include_router(oidc_router)
-app.include_router(logout_router)
 
 @app.get("/")
 def root():
