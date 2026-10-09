@@ -12,8 +12,15 @@ CREATE TABLE organizations (
 
     status VARCHAR(30) DEFAULT 'ACTIVE',
 
+    parent_organization_id UUID,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_parent_organization
+        FOREIGN KEY (parent_organization_id)
+        REFERENCES organizations(id)
+        ON DELETE SET NULL
 
 );

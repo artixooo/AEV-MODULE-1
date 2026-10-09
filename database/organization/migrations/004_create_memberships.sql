@@ -21,11 +21,13 @@ CREATE TABLE memberships (
             workspace_id
         ),
 
-    FOREIGN KEY (organization_id)
+    CONSTRAINT fk_membership_organization
+        FOREIGN KEY (organization_id)
         REFERENCES organizations(id)
         ON DELETE CASCADE,
 
-    FOREIGN KEY (workspace_id)
+    CONSTRAINT fk_membership_workspace
+        FOREIGN KEY (workspace_id)
         REFERENCES workspaces(id)
         ON DELETE CASCADE
 
