@@ -150,23 +150,23 @@ async function loadOrganizationsHierarchy() {
         (org) => `
       <div class="card-panel" style="margin-bottom: 20px;">
         <div class="panel-title">
-          <div>
-            <span style="font-size: 16px; font-weight: 700; color: #fff;">${org.name}</span>
-            <span class="badge-tag" style="margin-left: 8px;">Region: ${org.region}</span>
-            <span class="badge-tag" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">${org.plan.toUpperCase()}</span>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 15px; font-weight: 600; color: var(--text-main);">${org.name}</span>
+            <span class="badge-tag">Region: ${org.region}</span>
+            <span class="badge-tag" style="background: var(--success-light); color: var(--success); border: 1px solid var(--success-border); font-weight: 600;">${org.plan.toUpperCase()}</span>
           </div>
-          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">${org.org_id}</span>
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-light);">${org.org_id}</span>
         </div>
 
-        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 12px;">
           ${org.workspaces
             .map(
               (ws) => `
-            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
+            <div style="background: #ffffff; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 14px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div style="font-weight: 600; color: var(--accent-cyan); font-size: 14px;">
+                <div style="font-weight: 600; color: var(--text-main); font-size: 13.5px;">
                   &bull; Workspace: ${ws.name}
-                  <span style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);">(${ws.slug})</span>
+                  <span style="font-size: 11px; color: var(--text-light); font-family: var(--font-mono);">(${ws.slug})</span>
                 </div>
                 <button class="btn btn-secondary btn-sm" onclick="promptAddProject('${ws.workspace_id}')">+ Add Project</button>
               </div>
@@ -177,13 +177,13 @@ async function loadOrganizationsHierarchy() {
                     ? ws.projects
                         .map(
                           (p) => `
-                    <span style="font-family: var(--font-mono); font-size: 11px; background: rgba(0, 240, 255, 0.06); border: 1px solid rgba(0, 240, 255, 0.2); padding: 4px 10px; border-radius: 4px; color: #fff;">
+                    <span style="font-family: var(--font-mono); font-size: 11px; background: var(--bg-muted); border: 1px solid var(--border-light); padding: 4px 10px; border-radius: 4px; color: var(--text-main);">
                       Project: ${p.name}
                     </span>
                   `
                         )
                         .join("")
-                    : '<span style="font-size: 12px; color: var(--text-dim);">No projects yet in this workspace.</span>'
+                    : '<span style="font-size: 12px; color: var(--text-light);">No projects yet in this workspace.</span>'
                 }
               </div>
             </div>
@@ -236,11 +236,11 @@ async function loadKafkaEvents() {
       .map(
         (e) => `
       <tr>
-        <td><span class="badge-tag" style="background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3);">${e.event_type}</span></td>
+        <td><span class="badge-tag" style="background: var(--success-light); color: var(--success); border: 1px solid var(--success-border); font-weight: 600;">${e.event_type}</span></td>
         <td style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${e.correlation_id}</td>
-        <td style="font-size: 12px; font-weight: 500;">${e.actor ? e.actor.name : "system"}</td>
-        <td style="font-size: 12px; color: var(--accent-cyan); font-family: var(--font-mono);">${e.source}</td>
-        <td style="font-size: 12px; color: var(--text-dim);">${e.timestamp}</td>
+        <td style="font-size: 12px; font-weight: 500; color: var(--text-main);">${e.actor ? e.actor.name : "system"}</td>
+        <td style="font-size: 12px; color: var(--primary); font-family: var(--font-mono); font-weight: 500;">${e.source}</td>
+        <td style="font-size: 12px; color: var(--text-light);">${e.timestamp}</td>
         <td style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
           ${JSON.stringify(e.data)}
         </td>
@@ -266,12 +266,12 @@ async function loadSCIMUsers() {
     tbody.innerHTML = data.Resources.map(
       (u) => `
       <tr>
-        <td style="font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--accent-cyan);">${u.userName}</td>
-        <td>${u.name ? u.name.formatted : u.userName}</td>
+        <td style="font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--primary);">${u.userName}</td>
+        <td style="font-weight: 500; color: var(--text-main);">${u.name ? u.name.formatted : u.userName}</td>
         <td style="font-size: 12px; color: var(--text-muted);">${u.emails && u.emails[0] ? u.emails[0].value : ""}</td>
         <td><span class="badge-tag">${u.roles && u.roles[0] ? u.roles[0].value : "Member"}</span></td>
         <td><span class="badge-status ${u.active ? "active" : "corrupted"}">${u.active ? "Active" : "Deactivated"}</span></td>
-        <td style="font-size: 12px; color: var(--text-dim);">${u.meta ? u.meta.created.split("T")[0] : ""}</td>
+        <td style="font-size: 12px; color: var(--text-light);">${u.meta ? u.meta.created.split("T")[0] : ""}</td>
       </tr>
     `
     ).join("");
@@ -288,10 +288,10 @@ async function triggerMfaEnroll() {
     const content = document.getElementById("mfa-enrollment-content");
     box.style.display = "block";
     content.innerHTML = `
-      <div style="background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.2); padding: 16px; border-radius: var(--radius-sm);">
-        <p><strong>TOTP Secret Key:</strong> <code style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 14px;">${data.secret}</code></p>
-        <p style="margin-top: 8px;"><strong>OTPAUTH URI:</strong> <code style="font-family: var(--font-mono); font-size: 11px; word-break: break-all;">${data.otpauth_uri}</code></p>
-        <p style="margin-top: 8px; color: var(--accent-emerald);">Algorithm: ${data.algorithm} | 6-Digits | 30s Window. Compatible with Google Authenticator & 1Password.</p>
+      <div style="background: var(--bg-muted); border: 1px solid var(--border-light); padding: 16px; border-radius: var(--radius-sm);">
+        <p><strong>TOTP Secret Key:</strong> <code style="font-family: var(--font-mono); color: var(--primary); font-size: 13.5px; font-weight: 600;">${data.secret}</code></p>
+        <p style="margin-top: 8px;"><strong>OTPAuth URI:</strong> <code style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); word-break: break-all;">${data.otpauth_uri}</code></p>
+        <p style="margin-top: 8px; color: var(--success); font-weight: 500; font-size: 12px;">Algorithm: ${data.algorithm} | 6-Digits | 30s Window. Compatible with Google Authenticator, 1Password, and Microsoft Authenticator.</p>
       </div>
     `;
   } catch (err) {
@@ -313,10 +313,10 @@ async function loadRoleHierarchy() {
       .map(
         (r) => `
       <tr>
-        <td style="font-weight: 700; color: #fff;">${r.name}</td>
-        <td><span class="badge-tag" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border-color: rgba(99, 102, 241, 0.3);">${r.level} Level</span></td>
+        <td style="font-weight: 600; color: var(--text-main);">${r.name}</td>
+        <td><span class="badge-tag">${r.level} Level</span></td>
         <td style="font-size: 12px; color: var(--text-muted);">${r.description}</td>
-        <td><span class="badge-status ${r.is_system ? "synced" : "draft"}">${r.is_system ? "System Frozen" : "Custom"}</span></td>
+        <td><span class="badge-status ${r.is_system ? "synced" : "draft"}">${r.is_system ? "System Role" : "Custom"}</span></td>
       </tr>
     `
       )
@@ -426,14 +426,14 @@ async function loadVaultSecrets() {
       .map(
         (s) => `
       <tr>
-        <td style="font-family: var(--font-mono); font-size: 12px; font-weight: 600;">${s.path}</td>
+        <td style="font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--text-main);">${s.path}</td>
         <td><span class="badge-tag">${s.cycle}</span></td>
-        <td style="font-size: 12px; color: var(--text-dim);">${s.last_rotation}</td>
-        <td style="font-size: 12px; color: var(--text-dim);">${s.next_rotation}</td>
-        <td><span style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan);">${s.key_strength}</span></td>
+        <td style="font-size: 12px; color: var(--text-light);">${s.last_rotation}</td>
+        <td style="font-size: 12px; color: var(--text-light);">${s.next_rotation}</td>
+        <td><span style="font-family: var(--font-mono); font-size: 11px; color: var(--primary); font-weight: 600;">${s.key_strength}</span></td>
         <td><span class="badge-status ${s.status.toLowerCase()}">${s.status}</span></td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="rotateKey('${s.path}')">Rotate Now</button>
+          <button class="btn btn-secondary btn-sm" onclick="rotateKey('${s.path}')">Rotate Key</button>
         </td>
       </tr>
     `

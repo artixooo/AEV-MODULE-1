@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CYART - Platform Administration</title>
   <link rel="icon" type="image/png" href="/static/img/cyart-logo.png">
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/style.css?v=1.1">
 </head>
 <body>
   <div class="app-container">
@@ -183,8 +183,8 @@
         <div class="view-panel" id="view-orgs">
           <div class="page-header">
             <div>
-              <h2>Multi-Tenant Hierarchy (FR-ORG)</h2>
-              <p>Organization &rarr; Workspace &rarr; Project 3-tier scoping with database Row-Level Security.</p>
+              <h2>Organizations &amp; Workspaces</h2>
+              <p>Multi-tenant organization hierarchy, workspaces, and projects.</p>
             </div>
             <button class="btn btn-primary" id="btn-open-ws-modal">+ Create Workspace</button>
           </div>
@@ -198,10 +198,10 @@
         <div class="view-panel" id="view-events">
           <div class="page-header">
             <div>
-              <h2>Kafka Event Architecture (Section 8)</h2>
-              <p>Asynchronous event contracts published by Pod Alpha and consumed across downstream pods.</p>
+              <h2>Event Stream</h2>
+              <p>Real-time event bus and service messaging logs.</p>
             </div>
-            <button class="btn btn-primary" id="btn-open-event-modal">+ Emit Kafka Event</button>
+            <button class="btn btn-primary" id="btn-open-event-modal">+ Emit Event</button>
           </div>
 
           <div class="data-table-container">
@@ -227,8 +227,8 @@
         <div class="view-panel" id="view-scim">
           <div class="page-header">
             <div>
-              <h2>Identity & SCIM 2.0 (FR-AUTH)</h2>
-              <p>Enterprise Okta/Azure AD SCIM 2.0 provisioning and TOTP MFA enrollment.</p>
+              <h2>Directory &amp; SCIM</h2>
+              <p>SCIM 2.0 user directory management and multi-factor authentication.</p>
             </div>
             <div style="display: flex; gap: 8px;">
               <button class="btn btn-secondary" onclick="triggerMfaEnroll()">Enroll TOTP MFA</button>
@@ -237,7 +237,7 @@
           </div>
 
           <div class="card-panel" id="mfa-enrollment-box" style="display: none; margin-bottom: 20px;">
-            <div class="panel-title">TOTP MFA Enrollment (RFC 6238)</div>
+            <div class="panel-title">TOTP MFA Enrollment</div>
             <div id="mfa-enrollment-content" style="font-size: 13px; color: var(--text-muted);"></div>
           </div>
 
@@ -264,8 +264,8 @@
         <div class="view-panel" id="view-roles">
           <div class="page-header">
             <div>
-              <h2>Platform Role Hierarchy (Figure 2.1)</h2>
-              <p>Platform &rarr; Organization &rarr; Workspace &rarr; Project hierarchical roles.</p>
+              <h2>Roles &amp; Access Control</h2>
+              <p>Hierarchical access control and role-based permissions.</p>
             </div>
           </div>
 
@@ -290,8 +290,8 @@
         <div class="view-panel" id="view-audit">
           <div class="page-header">
             <div>
-              <h2>Tamper-Evident Audit Ledger (Section 7.6)</h2>
-              <p>Mathematical SHA-256 hash chaining: 7-year immutable compliance record.</p>
+              <h2>Audit Ledger</h2>
+              <p>Immutable append-only audit trail with cryptographic verification.</p>
             </div>
             <div style="display: flex; gap: 8px;">
               <button class="btn btn-secondary" id="btn-simulate-tamper">Simulate Tampering</button>
@@ -302,8 +302,8 @@
 
           <div class="terminal-wrapper" id="verification-terminal" style="display: block;">
             <div class="terminal-header">
-              <div class="terminal-title">Section 7.6 Hash Chain Verification Engine</div>
-              <span class="badge-tag">SHA-256 Cryptographic Chain</span>
+              <div class="terminal-title">Ledger Integrity Engine</div>
+              <span class="badge-tag">SHA-256 Verification</span>
             </div>
             <div class="terminal-body">
               <div class="terminal-line success">[INITIALIZED] Cryptographic ledger validation engine ready.</div>
@@ -316,12 +316,12 @@
             <table class="data-table" id="audit-table">
               <thead>
                 <tr>
-                  <th>Audit ID (UUIDv7)</th>
+                  <th>Audit ID</th>
                   <th>Action</th>
                   <th>Actor</th>
                   <th>Resource</th>
-                  <th>Previous Hash (SHA-256)</th>
-                  <th>Entry Hash (SHA-256)</th>
+                  <th>Previous Hash</th>
+                  <th>Entry Hash</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -336,8 +336,8 @@
         <div class="view-panel" id="view-vault">
           <div class="page-header">
             <div>
-              <h2>Secrets Manager & Key Vault (HashiCorp Vault)</h2>
-              <p>Per-tenant paths (/secret/data/tenant_{id}/...) with NIST SP 800-57 automated rotations.</p>
+              <h2>Secrets Vault</h2>
+              <p>Per-tenant secret management, encryption keys, and rotation schedules.</p>
             </div>
           </div>
 
@@ -365,8 +365,8 @@
         <div class="view-panel" id="view-flags">
           <div class="page-header">
             <div>
-              <h2>Centralized Configuration & Feature Flags (FR-CONFIG)</h2>
-              <p>Runtime feature flags with instantaneous platform and tenant kill switches.</p>
+              <h2>Feature Flags &amp; Configuration</h2>
+              <p>Runtime configuration switches and platform controls.</p>
             </div>
           </div>
 
@@ -487,6 +487,6 @@
     </div>
   </div>
 
-  <script src="/static/js/app.js"></script>
+  <script src="/static/js/app.js?v=1.1"></script>
 </body>
 </html>
