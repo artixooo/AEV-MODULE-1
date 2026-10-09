@@ -14,7 +14,7 @@ import uuid
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -39,9 +39,18 @@ TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
 (STATIC_DIR / "css").mkdir(parents=True, exist_ok=True)
 (STATIC_DIR / "js").mkdir(parents=True, exist_ok=True)
+(STATIC_DIR / "img").mkdir(parents=True, exist_ok=True)
 TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    fav = STATIC_DIR / "img" / "cyart-logo.png"
+    if fav.exists():
+        return FileResponse(fav)
+    return JSONResponse(status_code=404, content={"detail": "Not found"})
+
 
 GENESIS_HASH = "0000000000000000000000000000000000000000000000000000000000000000"
 
