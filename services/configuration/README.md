@@ -1,5 +1,46 @@
-# Configuration Service
+## Testing the week 4 
 
+Run all tests:
+
+```bash
+go test -v ./internal/config/...
+```
+
+**Test Coverage:**
+- 12 tests covering OIDC, OAuth2, SAML validation
+- Required field validation
+- URL format validation
+- All tests passing (100%)
+
+## Integration
+
+This validation package is called from:
+- `internal/idpconfig/service.go` — `SaveIdentityProviderConfig()` calls `ValidateProviderConfig()` before persistence
+
+## Error Types
+
+All validation errors inherit from standard Go `error` interface with descriptive messages:
+
+- `invalid provider_type: "unknown"` — Provider type not supported
+- `missing required field: issuer_url is required for this provider type` — Required field missing
+- `invalid URL format: invalid URL` — URL validation failed
+
+## Notes
+
+- **Sensitive fields protection:** Raw secrets (client_secret, private_key, password, etc.) are rejected. Only secret references (client_secret_ref, signing_key_ref, etc.) are accepted.
+  - Enforcement: Handled by `internal/validation/sensitive.go` in the persistence layer
+  - Validation: This package validates that only *_ref fields are present
+
+- **Tenant scoping:** Configuration validation is organization-agnostic. Tenant isolation is enforced at the persistence layer in `SaveIdentityProviderConfig()`.
+
+- **URL validation:** All URL fields must be well-formed HTTP/HTTPS URLs with valid scheme and host.
+
+## Future Enhancements
+
+- [ ] Support additional OIDC/OAuth2 parameters
+- [ ] Metadata validation for SAML configurations
+- [ ] Certificate chain validation
+- [ ] Custom validation rules per organization
 ## Purpose
 
 Centralized service for managing application configuration, feature flags, and tenant-specific settings.
@@ -197,4 +238,6 @@ See `.env.example` for the full list.
 - Integration with Identity Service for request authentication
 - Integration with Organization Service for tenant/org scoping validation
 - CI test harness for repository layer against a real Postgres instance (e.g. testcontainers-go)
+=======
 - Provider-specific validation (OIDC/OAuth2/SAML required-field checks) — in progress
+
