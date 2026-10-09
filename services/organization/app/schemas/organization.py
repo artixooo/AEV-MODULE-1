@@ -2,31 +2,47 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class OrganizationBase(BaseModel):
-    organization_name: str
-    organization_code: str
+    organization_name: str = Field(..., min_length=1, max_length=255)
+    organization_code: str = Field(..., min_length=1, max_length=50)
     description: Optional[str] = None
-    website: Optional[str] = None
-    status: str = "ACTIVE"
+    website: Optional[str] = Field(default=None, max_length=255)
+    status: str = Field(default="ACTIVE", max_length=30)
 
 
 class OrganizationCreate(OrganizationBase):
-    pass
+    parent_organization_id: Optional[UUID] = None
 
 
 class OrganizationUpdate(BaseModel):
-    organization_name: Optional[str] = None
-    organization_code: Optional[str] = None
+    organization_name: Optional[str] = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+    )
+    organization_code: Optional[str] = Field(
+        default=None,
+        min_length=1,
+        max_length=50,
+    )
     description: Optional[str] = None
-    website: Optional[str] = None
-    status: Optional[str] = None
+    website: Optional[str] = Field(
+        default=None,
+        max_length=255,
+    )
+    status: Optional[str] = Field(
+        default=None,
+        max_length=30,
+    )
+    parent_organization_id: Optional[UUID] = None
 
 
 class OrganizationResponse(OrganizationBase):
     id: UUID
+    parent_organization_id: Optional[UUID] = None
     created_at: datetime
     updated_at: datetime
 

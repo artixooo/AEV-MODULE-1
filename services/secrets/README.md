@@ -366,6 +366,72 @@ Review HashiCorp Vault architecture, verify local Docker container orchestration
 
 ---
 
+<<<<<<< HEAD
+=======
+# Week 3 Status
+
+## Sprint
+**Week 3 – Secrets Service Infrastructure Validation & Security Preparation (Issue #62)**
+
+### Objective
+Validate the Secrets Service infrastructure, verify environment configurations, ensure Docker networking connectivity, improve logging, and verify health endpoints in preparation for Week 4 authentication features.
+
+---
+
+## Component & Scope Status
+
+| Scope Item / Task | Status | Description / Notes |
+|---|---|---|
+| **Vault Connectivity** | **Verified** | Verified communication with unsealed Vault instance via `hvac`. |
+| **Authentication Configuration** | **Verified** | Validated root and development token workflows. |
+| **Environment Variable Validation** | **Verified** | Validated `VAULT_ADDR`, `VAULT_TOKEN`, and service configuration loading via `pydantic-settings`. |
+| **Docker Networking** | **Verified** | Container DNS resolution and bridge network connectivity validated against `pod-alpha_backend`. |
+| **Health Endpoints** | **Verified** | `/health` (Liveness) and `/ready` (Vault connectivity) endpoints verified. |
+| **Logging Improvements** | **Verified** | Standardized structured logging implemented for service lifecycle and probe events. |
+
+---
+
+## Deliverables Summary
+
+- **Vault Infrastructure**: Validated and operational.
+- **Configuration & Logging**: Verified and standardized.
+- **Documentation**: Updated with Week 3 milestone outcomes.
+- **Next Step**: Ready for Week 4 integration.
+
+---
+
+# Week 4 Status
+
+## Sprint
+**Week 4 – Secrets Service Identity Provider Credential Readiness**
+
+### Objective
+Prepare the Secrets Service to securely store credentials and configuration required by external identity-provider integrations (OAuth2, OIDC, SAML 2.0) with strict multi-tenant isolation.
+
+---
+
+## Component & Scope Status
+
+| Scope Item / Task | Status | Description / Notes |
+|---|---|---|
+| **IdP Configuration Requirements** | **Reviewed** | Analyzed external authentication flows for OAuth2, OIDC, and SAML 2.0. |
+| **Sensitive Field Identification** | **Reviewed** | Categorized `client_secret`, `signing_key`, and `private_key` as Vault-exclusive. |
+| **Tenant-Aware Path Standard** | **Verified** | Standardized path convention: `secret/data/tenants/{tenant_id}/idp/{provider_type}`. |
+| **Vault Access Policy Design** | **Prepared** | Defined tenant-isolated ACL policies (`docs/idp_vault_architecture.md`). |
+| **Secret Retrieval Mechanism** | **Verified** | Implemented and verified `IdpSecretManager` helper in `app/vault/idp.py`. |
+| **Full Secret-Management APIs** | **Planned / Out of Scope** | Public CRUD endpoints remain scheduled for future implementation sprints. |
+
+---
+
+## Deliverables Summary
+
+- **Storage Design & Path Conventions**: Documented in `docs/idp_vault_architecture.md`.
+- **Tenant Isolation & Policies**: Standardized and ACL-reviewed.
+- **Integration Helper**: Verified runtime retrieval helper prepared for Identity Service consumption.
+
+---
+
+>>>>>>> 721f4f7 (docs(secrets): update Week 4 status matrix and IdP credential readiness)
 **Squad 5 – Secrets**
 
 ## Sprint

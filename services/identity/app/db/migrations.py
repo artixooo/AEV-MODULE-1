@@ -7,23 +7,30 @@ from app.core.database import engine
 
 DOCKER_MIGRATIONS_DIR = Path("/app/database/identity/migrations")
 
-if DOCKER_MIGRATIONS_DIR.exists():
-    MIGRATIONS_DIR = DOCKER_MIGRATIONS_DIR
-else:
-    MIGRATIONS_DIR = (
-        Path(__file__).resolve().parents[4]
-        / "database"
-        / "identity"
-        / "migrations"
+
+def _get_migrations_dir() -> Path:
+    if DOCKER_MIGRATIONS_DIR.exists():
+        return DOCKER_MIGRATIONS_DIR
+
+    project_root = Path(__file__).resolve().parents[4]
+    migrations_dir = project_root / "database" / "identity" / "migrations"
+
+    if migrations_dir.exists():
+        return migrations_dir
+
+    raise RuntimeError(
+        f"No Identity migration directory found. "
+        f"Checked {migrations_dir} and {DOCKER_MIGRATIONS_DIR}"
     )
 
 
 def run_migrations():
-    migration_files = sorted(MIGRATIONS_DIR.glob("*.sql"))
+    migrations_dir = _get_migrations_dir()
+    migration_files = sorted(migrations_dir.glob("*.sql"))
 
     if not migration_files:
         raise RuntimeError(
-            f"No migration files found in {MIGRATIONS_DIR}"
+            f"No migration files found in {migrations_dir}"
         )
 
     with engine.begin() as connection:

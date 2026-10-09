@@ -1,7 +1,7 @@
 from typing import Any
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.config import settings
@@ -10,7 +10,7 @@ from app.core.config import settings
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
-def get_bearer_token(request) -> str:
+def get_bearer_token(request: Request) -> str:
     """
     Extract a Bearer token from the Authorization header.
     """
@@ -111,3 +111,25 @@ async def get_authenticated_claims(
         )
 
     return validate_jwt_claims(credentials.credentials)
+
+
+def get_authenticated_tenant_id(
+    claims: dict[str, Any] = Depends(get_authenticated_claims),
+) -> str:
+    """
+    Return the tenant_id from the authenticated JWT.
+
+    The tenant_id from the authenticated JWT is authoritative.
+    Client-provided tenant identifiers must not override it.
+    """
+
+    tenant_id = claims.get("tenant_id")
+
+    if not tenant_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="JWT is missing required 'tenant_id' claim",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return str(tenant_id)

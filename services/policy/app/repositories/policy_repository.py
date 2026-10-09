@@ -7,23 +7,37 @@ This keeps the evaluation logic in policy_service.py testable in isolation
 from the database, and keeps the database queries reusable across
 future service-layer functions without duplicating query logic.
 
-Author: Utkarsh Pratham (Squad Lead) & Narayanan Varadarajan
+Week 4 (#93) addition: get_role_by_code and list_roles now optionally
+accept an organization_id scope. When provided, only a role that
+either belongs to that exact organization, or is a global/system role
+(organization_id IS NULL), will be matched — a role belonging to a
+*different* organization is treated identically to a role that
+doesn't exist at all, so callers can't distinguish "wrong org" from
+"no such role".
+
+Author: Utkarsh Pratham (Squad Lead), Narayanan Varadarajan & Pratik
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 
 from typing import Optional
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.policy_models import Role, Permission, RolePermission
 
 
-def get_role_by_code(db: Session, role_code: str) -> Optional[Role]:
-    """Fetch a single active role by its unique role_code."""
-    return (
-        db.query(Role)
-        .filter(Role.role_code == role_code, Role.status == "ACTIVE")
-        .first()
-    )
+def get_role_by_code(db: Session, role_code: str, organization_id: Optional[str] = None) -> Optional[Role]:
+    """
+    Fetch a single active role by its unique role_code.
+
+    If organization_id is given, only matches a role scoped to that
+    organization or a global role (organization_id IS NULL). A role
+    that belongs to a *different* organization is not matched.
+    """
+    query = db.query(Role).filter(Role.role_code == role_code, Role.status == "ACTIVE")
+    if organization_id is not None:
+        query = query.filter(or_(Role.organization_id == organization_id, Role.organization_id.is_(None)))
+    return query.first()
 
 
 def get_permission_by_code(db: Session, permission_code: str) -> Optional[Permission]:
@@ -35,9 +49,12 @@ def get_permission_by_code(db: Session, permission_code: str) -> Optional[Permis
     )
 
 
-def list_roles(db: Session) -> list[Role]:
-    """List all active roles."""
-    return db.query(Role).filter(Role.status == "ACTIVE").order_by(Role.role_name).all()
+def list_roles(db: Session, organization_id: Optional[str] = None) -> list[Role]:
+    """List all active roles, optionally scoped to an organization (plus global roles)."""
+    query = db.query(Role).filter(Role.status == "ACTIVE")
+    if organization_id is not None:
+        query = query.filter(or_(Role.organization_id == organization_id, Role.organization_id.is_(None)))
+    return query.order_by(Role.role_name).all()
 
 
 def list_permissions(db: Session) -> list[Permission]:

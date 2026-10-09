@@ -1,7 +1,10 @@
-from sqlalchemy import Column, DateTime, String, Text
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql import func
 import uuid
+
+from sqlalchemy import Column, DateTime, ForeignKey, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
 
 from app.db.database import Base
 
@@ -46,6 +49,13 @@ class Organization(Base):
         nullable=False,
     )
 
+    parent_organization_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
     created_at = Column(
         DateTime,
         server_default=func.now(),
@@ -57,4 +67,27 @@ class Organization(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    parent = relationship(
+        "Organization",
+        remote_side=[id],
+        back_populates="children",
+    )
+
+    children = relationship(
+        "Organization",
+        back_populates="parent",
+    )
+
+    memberships = relationship(
+        "Membership",
+        back_populates="organization",
+        cascade="all, delete-orphan",
+    )
+
+    workspaces = relationship(
+        "Workspace",
+        back_populates="organization",
+        cascade="all, delete-orphan",
     )
