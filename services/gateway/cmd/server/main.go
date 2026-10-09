@@ -1,4 +1,4 @@
-﻿package main
+package main
 
 import (
 	"log"
@@ -48,10 +48,7 @@ func main() {
 	e.Server.ReadTimeout = 10 * time.Second
 	e.Server.WriteTimeout = 10 * time.Second
 
-<<<<<<< HEAD
-=======
 	// Public routes
->>>>>>> d5c4b9c3ab522147e900c8d47ffad2d71b08069f
 	e.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Gateway is active and healthy")
 	})
@@ -71,53 +68,81 @@ func main() {
 	v1 := e.Group("/api/v1")
 	v1.Use(injectServiceKey(serviceAPIKey))
 
-	identityURLStr := os.Getenv("IDENTITY_SERVICE_URL")
-	if identityURLStr == "" {
-		identityURLStr = "http://identity:8000"
+	createProxy := func(targetEnv, defaultTarget string) echo.MiddlewareFunc {
+		targetStr := getEnvOrDefault(targetEnv, defaultTarget)
+		targetURL, err := url.Parse(targetStr)
+		if err != nil {
+			log.Printf("Invalid target URL for %s: %v", targetEnv, err)
+			return nil
+		}
+		return echomiddleware.Proxy(
+			echomiddleware.NewRoundRobinBalancer([]*echomiddleware.ProxyTarget{
+				{URL: targetURL},
+			}),
+		)
 	}
 
-	identityURL, err := url.Parse(identityURLStr)
-	if err != nil {
-		log.Fatalf("Invalid IDENTITY_SERVICE_URL: %v", err)
-	}
-
-	identityProxy := echomiddleware.Proxy(
-		echomiddleware.NewRoundRobinBalancer(
-			[]*echomiddleware.ProxyTarget{
-				{URL: identityURL},
-			},
-		),
-	)
+	identityProxy := createProxy("IDENTITY_SERVICE_URL", "http://identity:8000")
+	orgProxy := createProxy("ORGANIZATION_SERVICE_URL", "http://organization:8001")
+	policyProxy := createProxy("POLICY_SERVICE_URL", "http://policy:8002")
+	secretsProxy := createProxy("SECRETS_SERVICE_URL", "http://secrets:8003")
+	auditProxy := createProxy("AUDIT_SERVICE_URL", "http://audit:8082")
+	configProxy := createProxy("CONFIGURATION_SERVICE_URL", "http://configuration:8083")
 
 	// Public authentication routes
-	v1.Any("/auth", func(c echo.Context) error { return echo.NewHTTPError(http.StatusNotFound, "Identity route not found") }, identityProxy)
-	v1.Any("/auth/*", func(c echo.Context) error { return echo.NewHTTPError(http.StatusNotFound, "Identity route not found") }, identityProxy)
+	if identityProxy != nil {
+		v1.Any("/auth", func(c echo.Context) error { return nil }, identityProxy)
+		v1.Any("/auth/*", func(c echo.Context) error { return nil }, identityProxy)
+		v1.Any("/scim/*", func(c echo.Context) error { return nil }, identityProxy)
+		// Protected Identity routes
+		v1.Any("/users", func(c echo.Context) error { return nil }, middleware.JWTAuth(), identityProxy)
+		v1.Any("/users/*", func(c echo.Context) error { return nil }, middleware.JWTAuth(), identityProxy)
+	}
 
-	// Protected Identity routes
-	v1.Any("/users", func(c echo.Context) error { return echo.NewHTTPError(http.StatusNotFound, "Identity route not found") }, middleware.JWTAuth(), identityProxy)
-	v1.Any("/users/*", func(c echo.Context) error { return echo.NewHTTPError(http.StatusNotFound, "Identity route not found") }, middleware.JWTAuth(), identityProxy)
+	// Organization routes
+	if orgProxy != nil {
+		v1.Any("/organizations", func(c echo.Context) error { return nil }, middleware.JWTAuth(), orgProxy)
+		v1.Any("/organizations/*", func(c echo.Context) error { return nil }, middleware.JWTAuth(), orgProxy)
+	} else {
+		v1.Any("/organizations", stubHandler("Organization"), middleware.JWTAuth())
+		v1.Any("/organizations/*", stubHandler("Organization"), middleware.JWTAuth())
+	}
 
-	// Protected contract routes (mapped to both exact and wildcard paths to fix 404s)
-	v1.Any("/organizations", stubHandler("Organization"), middleware.JWTAuth())
-	v1.Any("/organizations/*", stubHandler("Organization"), middleware.JWTAuth())
+	// Policy routes
+	if policyProxy != nil {
+		v1.Any("/policies", func(c echo.Context) error { return nil }, middleware.JWTAuth(), policyProxy)
+		v1.Any("/policies/*", func(c echo.Context) error { return nil }, middleware.JWTAuth(), policyProxy)
+	} else {
+		v1.Any("/policies", stubHandler("Policy"), middleware.JWTAuth())
+		v1.Any("/policies/*", stubHandler("Policy"), middleware.JWTAuth())
+	}
 
-	v1.Any("/policies", stubHandler("Policy"), middleware.JWTAuth())
-	v1.Any("/policies/*", stubHandler("Policy"), middleware.JWTAuth())
+	// Configuration routes
+	if configProxy != nil {
+		v1.Any("/configuration", func(c echo.Context) error { return nil }, middleware.JWTAuth(), configProxy)
+		v1.Any("/configuration/*", func(c echo.Context) error { return nil }, middleware.JWTAuth(), configProxy)
+	} else {
+		v1.Any("/configuration", stubHandler("Configuration"), middleware.JWTAuth())
+		v1.Any("/configuration/*", stubHandler("Configuration"), middleware.JWTAuth())
+	}
 
-	v1.Any("/configuration", stubHandler("Configuration"), middleware.JWTAuth())
-	v1.Any("/configuration/*", stubHandler("Configuration"), middleware.JWTAuth())
+	// Audit routes
+	if auditProxy != nil {
+		v1.Any("/audit", func(c echo.Context) error { return nil }, middleware.JWTAuth(), auditProxy)
+		v1.Any("/audit/*", func(c echo.Context) error { return nil }, middleware.JWTAuth(), auditProxy)
+	} else {
+		v1.Any("/audit", stubHandler("Audit"), middleware.JWTAuth())
+		v1.Any("/audit/*", stubHandler("Audit"), middleware.JWTAuth())
+	}
 
-	v1.Any("/audit", stubHandler("Audit"), middleware.JWTAuth())
-	v1.Any("/audit/*", stubHandler("Audit"), middleware.JWTAuth())
-
-<<<<<<< HEAD
-	v1.Any("/secrets", stubHandler("Secrets"), middleware.JWTAuth())
-	v1.Any("/secrets/*", stubHandler("Secrets"), middleware.JWTAuth())
-=======
-	v1.Any("/secrets/*", func(c echo.Context) error {
-		return echo.NewHTTPError(http.StatusBadGateway, "Secrets service pending integration")
-	}, middleware.JWTAuth())
->>>>>>> d5c4b9c3ab522147e900c8d47ffad2d71b08069f
+	// Secrets routes
+	if secretsProxy != nil {
+		v1.Any("/secrets", func(c echo.Context) error { return nil }, middleware.JWTAuth(), secretsProxy)
+		v1.Any("/secrets/*", func(c echo.Context) error { return nil }, middleware.JWTAuth(), secretsProxy)
+	} else {
+		v1.Any("/secrets", stubHandler("Secrets"), middleware.JWTAuth())
+		v1.Any("/secrets/*", stubHandler("Secrets"), middleware.JWTAuth())
+	}
 
 	log.Printf("API Gateway starting up on port %s...", port)
 	e.Logger.Fatal(e.Start(":" + port))
