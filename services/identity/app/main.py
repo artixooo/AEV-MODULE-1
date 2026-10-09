@@ -4,11 +4,15 @@ from fastapi import FastAPI
 
 from app.core.redis import check_redis, close_redis
 from app.db.migrations import run_migrations
+from app.routers.oauth_router import router as oauth_router
+from app.routers.oidc_router import router as oidc_router
 
 # Import models so SQLAlchemy registers them with Base
 from app.models.user import User
 from app.models.session import Session
 from app.models.refresh_token import RefreshToken
+from app.models.oauth_config import OAuthConfig
+from app.models.oidc_config import OIDCConfig
 
 from app.routers.auth_router import router as auth_router
 from app.routers.router_logout import router as logout_router
@@ -56,8 +60,9 @@ app = FastAPI(
 
 
 app.include_router(auth_router)
+app.include_router(oauth_router)
+app.include_router(oidc_router)
 app.include_router(logout_router)
-
 
 @app.get("/")
 def root():
