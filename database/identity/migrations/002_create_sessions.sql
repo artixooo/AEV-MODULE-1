@@ -5,8 +5,6 @@ CREATE TABLE IF NOT EXISTS sessions (
 
     tenant_id UUID NOT NULL,
 
-    session_token TEXT NOT NULL UNIQUE,
-
     device_name VARCHAR(150),
 
     device_type VARCHAR(50),
@@ -15,14 +13,14 @@ CREATE TABLE IF NOT EXISTS sessions (
 
     user_agent TEXT,
 
-    is_active BOOLEAN DEFAULT TRUE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
     expires_at TIMESTAMP NOT NULL,
 
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE

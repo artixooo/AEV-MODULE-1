@@ -37,7 +37,6 @@ def create_test_session(db_session, user):
         id=uuid.uuid4(),
         user_id=user.id,
         tenant_id=user.tenant_id,
-        session_token=uuid.uuid4().hex,
         expires_at=datetime.now(timezone.utc) + timedelta(days=7),
     )
 

@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from app.core.redis import check_redis, close_redis
 from app.db.migrations import run_migrations
@@ -16,6 +17,8 @@ from app.models.oidc_config import OIDCConfig
 
 from app.routers.auth_router import router as auth_router
 from app.routers.router_logout import router as logout_router
+from app.routers.router_sessions import router as sessions_router
+from app.services.auth_service import AuthError
 
 from app.routers.scim import (
     groups_router as scim_groups_router,
@@ -57,12 +60,34 @@ async def lifespan(app: FastAPI):
     print("Identity Service shutdown complete")
 
 
+
 app = FastAPI(
     title="Identity Service",
     version="0.1.0",
     lifespan=lifespan,
 )
 
+@app.exception_handler(AuthError)
+async def auth_error_handler(
+    request: Request,
+    exc: AuthError,
+):
+    return JSONResponse(
+        status_code=401,
+        content={
+            "detail": exc.detail,
+            "error_code": exc.error_code,
+        },
+    )
+
+
+app.include_router(auth_router)
+app.include_router(logout_router)
+app.include_router(sessions_router)
+app.include_router(oauth_router)
+app.include_router(oidc_router)
+app.include_router(scim_groups_router)
+app.include_router(scim_users_router)
 @app.get("/")
 def root():
     return {
