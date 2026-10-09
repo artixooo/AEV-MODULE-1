@@ -1,16 +1,16 @@
 """
-Policy APIs (v1) — RBAC scope, Issue #61.
+Policy APIs (v1) — Tenant-Aware RBAC scope.
 
 All endpoints require a valid Bearer token (see app/middleware/auth_middleware.py).
-The token proves who is calling; it does not carry role information, so
-POST /evaluate takes role_code explicitly rather than deriving it from
-the token.
+POST /evaluate is an internal service-to-service endpoint requiring both an
+authenticated user JWT and the shared internal service credential.
 
-Author: Utkarsh Pratham (Squad Lead) & Narayanan Varadarajan
+Author: Utkarsh Pratham (Squad Lead), Narayanan Varadarajan & Pratik
 Organization: CyArt Tech LLP | AEV Platform - Pod Alpha
 """
 
-from fastapi import APIRouter, Depends
+from typing import Optional
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -62,13 +62,10 @@ def list_permissions(
         "**⚠️ This is an internal service-to-service endpoint. It must not be "
         "exposed directly to end users or public-facing clients — only to "
         "trusted backend callers (e.g. the API Gateway).**\n\n"
-        "Pure Role-Based Access Control check: does role_code have permission_code, "
-        "via the role_permissions mapping? Returns DENY (not an error) if either the "
-        "role or permission code does not exist. Requires both a valid end-user "
-        "Bearer JWT and the shared X-Service-API-Key header — see "
-        "app/middleware/service_auth_middleware.py for why the second credential "
-        "is required. Does not evaluate ABAC conditions, Segregation of Duties "
-        "rules, or apply caching — those are out of scope for this endpoint."
+        "Tenant-Aware Role-Based Access Control check: does the subject have "
+        "permission_code within the target tenant and scope? Enforces strict cross-tenant "
+        "denial. Supports both explicit role_code or membership_role mapping. "
+        "Requires both a valid end-user Bearer JWT and the shared X-Service-API-Key header."
     ),
 )
 def evaluate(
@@ -76,8 +73,25 @@ def evaluate(
     db: Session = Depends(get_db),
     _user: AuthenticatedUser = Depends(get_current_user),
     _service: bool = Depends(require_service_credential),
+    x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-ID"),
+    x_org_id: Optional[str] = Header(None, alias="X-Org-ID"),
 ):
-    result = evaluate_permission(db, request.role_code, request.permission_code)
+    # Fallback to HTTP headers if not provided in JSON body
+    caller_tenant = request.tenant_id or x_tenant_id
+    caller_org = request.org_id or x_org_id
+
+    result = evaluate_permission(
+        db=db,
+        role_code=request.role_code,
+        permission_code=request.permission_code,
+        tenant_id=caller_tenant,
+        target_tenant_id=request.target_tenant_id,
+        org_id=caller_org,
+        workspace_id=request.workspace_id,
+        project_id=request.project_id,
+        scope=request.scope,
+        membership_role=request.membership_role,
+    )
     return EvaluateResponse(
         effect=result.effect,
         reason=result.reason,
