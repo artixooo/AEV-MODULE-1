@@ -5,10 +5,12 @@ Strictly adhering to CyArt Tech LLP Engineering Build Guide v1.0
 """
 
 from datetime import datetime, timezone
+import base64
 import hashlib
 import json
 import os
 from pathlib import Path
+import secrets as py_secrets
 from typing import Any, Dict, List, Optional
 import uuid
 
@@ -79,51 +81,6 @@ def compute_entry_hash(prev_hash: str, entry: dict) -> str:
 # AEV Module 1 Squad Architecture & Specifications
 # Identity, Zero-Trust Substrate & Cryptographic Architecture: https://tryhackme.com/p/artixooo
 # -----------------------------------------------------------------------------
-
-WORK_ALLOCATION = [
-    {
-        "squad": "Squad 1",
-        "service": "API Gateway",
-        "tech": "Go 1.22 + Envoy Proxy",
-        "responsibilities": "Central edge routing, TLS 1.3 termination, token-bucket rate limiting (10,000 RPS), JWT validation, service communication header injection",
-    },
-    {
-        "squad": "Squad 2",
-        "service": "Identity Service",
-        "tech": "Go / Gin + Redis",
-        "responsibilities": "Authentication, JWT, OAuth 2.0 / OIDC (PKCE), SAML 2.0, RFC 6238 TOTP MFA, RFC 7643/7644 SCIM 2.0 provisioning, session management",
-    },
-    {
-        "squad": "Squad 3",
-        "service": "Organization Service",
-        "tech": "Python / FastAPI + PostgreSQL",
-        "responsibilities": "Organizations, workspaces, projects, 3-tier tenant hierarchy, PostgreSQL Row-Level Security (RLS), tenant quotas & memberships",
-    },
-    {
-        "squad": "Squad 4",
-        "service": "Policy Service",
-        "tech": "Python + OPA Engine",
-        "responsibilities": "RBAC, ABAC, dynamic permission engine (<1ms evaluation), Segregation of Duties (SoD), custom permission matrices",
-    },
-    {
-        "squad": "Squad 5",
-        "service": "Secrets Service",
-        "tech": "Go + HashiCorp Vault",
-        "responsibilities": "Vault integration, per-tenant secret engines, NIST SP 800-57 automated key rotation (AES-256-GCM, Ed25519), break-glass controls",
-    },
-    {
-        "squad": "Squad 6",
-        "service": "Audit Service",
-        "tech": "Go + Apache Kafka",
-        "responsibilities": "Audit logs, Kafka consumers, cryptographic SHA-256 hash chaining, live mathematical ledger verification, compliance",
-    },
-    {
-        "squad": "Squad 7",
-        "service": "Configuration Service",
-        "tech": "Python / FastAPI",
-        "responsibilities": "Feature flags, runtime configuration, tenant settings, hot-reloading switches, kill-switch circuit breakers",
-    },
-]
 
 
 
@@ -493,10 +450,6 @@ async def serve_admin_console():
         return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
     return HTMLResponse("<h2>Console UI Template not loaded</h2>")
 
-@app.get("/api/v1/work-allocation")
-def get_work_allocation():
-    return {"squads": WORK_ALLOCATION}
-
 
 @app.get("/api/v1/health")
 def get_health():
@@ -789,7 +742,8 @@ def scim_create_user(user: SCIMUserCreate):
 # ---------------- Section 6.1: MFA TOTP Enrollment ----------------
 @app.post("/api/v1/auth/mfa/enroll")
 def mfa_enroll():
-    secret = "JBSWY3DPEHPK3PXP"  # Standard base32 test secret
+    # Cryptographically secure RFC 6238 Base32 secret generation (160-bit entropy)
+    secret = base64.b32encode(py_secrets.token_bytes(20)).decode("utf-8").rstrip("=")
     uri = f"otpauth://totp/CyArt%20AEV:admin@cyart.io?secret={secret}&issuer=CyArt%20AEV"
     return {
         "secret": secret,
